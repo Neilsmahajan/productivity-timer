@@ -8,14 +8,14 @@ import (
 
 templ UserPage(user goth.User) {
 	<p><a href={ fmt.Sprintf("/logout/%s", user.Provider) }>logout</a></p>
-	<p>Name: user.Name [user.LastName, user.FirstName]</p>
-	<p>Email: user.Email</p>
-	<p>NickName: user.NickName</p>
-	<p>Location: user.Location</p>
-	<p>AvatarURL: user.AvatarURL <img src={ fmt.Sprintf("%s", user.AvatarURL) }/></p>
-	<p>Description: user.Description</p>
-	<p>UserID: user.UserID</p>
-	<p>AccessToken: user.AccessToken</p>
-	<p>ExpiresAt: user.ExpiresAt</p>
-	<p>RefreshToken: user.RefreshToken</p>
+	<p>Name: { user.Name }[{ user.LastName }, { user.FirstName }]</p>
+	<p>Email: { user.Email }</p>
+	<p>NickName: { user.NickName }</p>
+	<p>Location: { user.Location }</p>
+	<p>AvatarURL: { user.AvatarURL }<img src={ fmt.Sprintf("%s", user.AvatarURL) }/></p>
+	<p>Description: { user.Description }</p>
+	<p>UserID: { user.UserID }</p>
+	<p>AccessToken: { user.AccessToken }</p>
+	<p>ExpiresAt: { user.ExpiresAt.String() }</p>
+	<p>RefreshToken: { user.RefreshToken }</p>
 }
