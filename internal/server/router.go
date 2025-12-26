@@ -117,12 +117,17 @@ func (s *Server) callbackHandler(c *gin.Context) {
 }
 
 func (s *Server) logoutHandler(c *gin.Context) {
+	// Clear Gothic session (OAuth state)
 	if err := gothic.Logout(c.Writer, c.Request); err != nil {
-		return
+		log.Printf("Error clearing gothic session: %v", err)
 	}
 
-	c.Header("Location", "/")
-	c.Status(http.StatusTemporaryRedirect)
+	// Clear our custom user session
+	if err := s.auth.ClearUserSession(c.Writer, c.Request); err != nil {
+		log.Printf("Error clearing user session: %v", err)
+	}
+
+	c.Redirect(http.StatusTemporaryRedirect, "/")
 }
 
 func (s *Server) authHandler(c *gin.Context) {

@@ -22,6 +22,7 @@ const (
 type Service interface {
 	GetUserFromSession(r *http.Request) (*goth.User, error)
 	StoreUserInSession(w http.ResponseWriter, r *http.Request, user *goth.User) error
+	ClearUserSession(w http.ResponseWriter, r *http.Request) error
 }
 
 type service struct{}
@@ -71,6 +72,26 @@ func (s *service) StoreUserInSession(w http.ResponseWriter, r *http.Request, use
 	}
 
 	log.Printf("User session saved for: %s", user.Email)
+	return nil
+}
+
+func (s *service) ClearUserSession(w http.ResponseWriter, r *http.Request) error {
+	session, err := gothic.Store.Get(r, "user-session")
+	if err != nil {
+		return err
+	}
+
+	// Clear the session by setting MaxAge to -1
+	session.Options.MaxAge = -1
+	delete(session.Values, "user")
+
+	err = session.Save(r, w)
+	if err != nil {
+		log.Printf("Error clearing session: %v", err)
+		return err
+	}
+
+	log.Printf("User session cleared")
 	return nil
 }
 
