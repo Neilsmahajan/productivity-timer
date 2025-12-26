@@ -2,12 +2,13 @@ package server
 
 import (
 	"context"
-	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/markbates/goth/gothic"
+	"github.com/neilsmahajan/productivity-timer/internal/models"
 	"github.com/neilsmahajan/productivity-timer/web/templates"
 )
 
@@ -35,8 +36,43 @@ func (s *Server) RegisterRoutes() http.Handler {
 }
 
 func (s *Server) indexHandler(c *gin.Context) {
-	component := templates.IndexPage()
+	// Try to get user from session
+	gothUser, err := s.auth.GetUserFromSession(c.Request)
+	if err != nil || gothUser == nil {
+		// No user logged in, show index page with login button
+		component := templates.IndexPage()
+		if err = component.Render(context.Background(), c.Writer); err != nil {
+			log.Printf("Error rendering index page: %v", err)
+			c.String(http.StatusInternalServerError, "Error rendering page")
+			return
+		}
+		return
+	}
+
+	// User is logged in, get from database
+	user, err := s.db.GetUserByID(c.Request.Context(), gothUser.UserID)
+	if err != nil {
+		log.Printf("Error getting user from database: %v", err)
+		c.String(http.StatusInternalServerError, "Error getting user")
+		return
+	}
+
+	if user == nil {
+		// User not in database, show login page
+		component := templates.IndexPage()
+		if err := component.Render(context.Background(), c.Writer); err != nil {
+			log.Printf("Error rendering index page: %v", err)
+			c.String(http.StatusInternalServerError, "Error rendering page")
+			return
+		}
+		return
+	}
+
+	// Show user page with user information
+	component := templates.UserPage(*gothUser)
 	if err := component.Render(context.Background(), c.Writer); err != nil {
+		log.Printf("Error rendering user page: %v", err)
+		c.String(http.StatusInternalServerError, "Error rendering page")
 		return
 	}
 }
@@ -51,15 +87,33 @@ func (s *Server) callbackHandler(c *gin.Context) {
 	q.Add("provider", provider)
 	c.Request.URL.RawQuery = q.Encode()
 
+	// Complete the OAuth authentication flow
 	gothUser, err := gothic.CompleteUserAuth(c.Writer, c.Request)
 	if err != nil {
-		_, _ = fmt.Fprintln(c.Writer, err)
-	}
-
-	component := templates.UserPage(gothUser)
-	if err = component.Render(context.Background(), c.Writer); err != nil {
+		log.Printf("Error completing auth: %v", err)
+		c.Redirect(http.StatusTemporaryRedirect, "/")
 		return
 	}
+
+	// Convert goth.User to our User model and save to database
+	user := models.FromGothUser(gothUser)
+	_, err = s.db.FindOrCreateUser(c.Request.Context(), user)
+	if err != nil {
+		log.Printf("Error saving user to database: %v", err)
+		c.Redirect(http.StatusTemporaryRedirect, "/")
+		return
+	}
+
+	// Store user in our custom session
+	err = s.auth.StoreUserInSession(c.Writer, c.Request, &gothUser)
+	if err != nil {
+		log.Printf("Error storing user in session: %v", err)
+		c.Redirect(http.StatusTemporaryRedirect, "/")
+		return
+	}
+
+	// Redirect to index page (will show user info)
+	c.Redirect(http.StatusTemporaryRedirect, "/")
 }
 
 func (s *Server) logoutHandler(c *gin.Context) {
@@ -77,13 +131,14 @@ func (s *Server) authHandler(c *gin.Context) {
 	q.Add("provider", provider)
 	c.Request.URL.RawQuery = q.Encode()
 
-	// try to get the user without re-authenticating
-	if gothUser, err := gothic.CompleteUserAuth(c.Writer, c.Request); err == nil {
-		component := templates.UserPage(gothUser)
-		if err = component.Render(context.Background(), c.Writer); err != nil {
-			return
-		}
-	} else {
-		gothic.BeginAuthHandler(c.Writer, c.Request)
+	// Check if user is already authenticated
+	gothUser, err := s.auth.GetUserFromSession(c.Request)
+	if err == nil && gothUser != nil {
+		// Already authenticated, redirect to index
+		c.Redirect(http.StatusTemporaryRedirect, "/")
+		return
 	}
+
+	// Not authenticated, begin OAuth flow
+	gothic.BeginAuthHandler(c.Writer, c.Request)
 }
