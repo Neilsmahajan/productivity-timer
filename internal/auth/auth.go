@@ -18,7 +18,13 @@ const (
 	isProd = false
 )
 
-func NewAuth() {
+type Service interface{}
+
+type service struct {
+	user *goth.User
+}
+
+func NewAuth() Service {
 	if err := godotenv.Load(); err != nil {
 		log.Fatal("Error loading .env file")
 	}
@@ -39,4 +45,6 @@ func NewAuth() {
 
 	callbackURL := fmt.Sprintf("http://localhost:%s/auth/google/callback", port)
 	goth.UseProviders(google.New(googleClientId, googleClientSecret, callbackURL))
+
+	return &service{}
 }

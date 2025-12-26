@@ -53,10 +53,7 @@ func (s *Server) callbackHandler(c *gin.Context) {
 
 	gothUser, err := gothic.CompleteUserAuth(c.Writer, c.Request)
 	if err != nil {
-		_, err = fmt.Fprintln(c.Writer, err)
-		if err != nil {
-			return
-		}
+		_, _ = fmt.Fprintln(c.Writer, err)
 	}
 
 	component := templates.UserPage(gothUser)
