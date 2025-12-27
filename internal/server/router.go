@@ -30,6 +30,8 @@ func (s *Server) RegisterRoutes() http.Handler {
 
 	r.GET("/auth/:provider", s.authHandler)
 
+	r.POST("/timer/start", s.startTimerHandler)
+
 	return r
 }
 
