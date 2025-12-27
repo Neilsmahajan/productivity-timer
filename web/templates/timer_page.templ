@@ -4,18 +4,63 @@ import (
 	"fmt"
 
 	"github.com/markbates/goth"
+	"github.com/neilsmahajan/productivity-timer/internal/models"
 )
 
-templ TimerPage(user goth.User) {
-	<p><a href={ fmt.Sprintf("/logout/%s", user.Provider) }>logout</a></p>
-	<p>Name: { user.Name }[{ user.LastName }, { user.FirstName }]</p>
-	<p>Email: { user.Email }</p>
-	<p>NickName: { user.NickName }</p>
-	<p>Location: { user.Location }</p>
-	<p>AvatarURL: { user.AvatarURL }<img src={ fmt.Sprintf("%s", user.AvatarURL) }/></p>
-	<p>Description: { user.Description }</p>
-	<p>UserID: { user.UserID }</p>
-	<p>AccessToken: { user.AccessToken }</p>
-	<p>ExpiresAt: { user.ExpiresAt.String() }</p>
-	<p>RefreshToken: { user.RefreshToken }</p>
+// formatDuration converts seconds to HH:MM:SS format
+func formatDuration(seconds int64) string {
+	hours := seconds / 3600
+	minutes := (seconds % 3600) / 60
+	secs := seconds % 60
+	return fmt.Sprintf("%02d:%02d:%02d", hours, minutes, secs)
+}
+
+templ TimerPage(user goth.User, activeSession *models.TimerSession) {
+	<html>
+		<head>
+			<title>Productivity Timer</title>
+			<script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.8/dist/htmx.min.js" integrity="sha384-/TgkGk7p307TH7EXJDuUlgG3Ce1UVolAOFopFekQkkXihi5u/6OCvVKyz1W+idaz" crossorigin="anonymous"></script>
+		</head>
+		<body>
+			<div style="padding: 20px;">
+				<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+					<div>
+						<img src={ user.AvatarURL } alt="avatar" style="width: 40px; height: 40px; border-radius: 50%; vertical-align: middle;"/>
+						<span style="margin-left: 10px;">{ user.Email }</span>
+					</div>
+					<a href={ templ.URL(fmt.Sprintf("/logout/%s", user.Provider)) }>logout</a>
+				</div>
+				<h1>Productivity Timer</h1>
+				<div id="timer-container">
+					if activeSession == nil {
+						@TimerIdle()
+					} else {
+						@TimerRunning(activeSession, 0)
+					}
+				</div>
+			</div>
+		</body>
+	</html>
+}
+
+templ TimerIdle() {
+	<div style="text-align: center; padding: 40px;">
+		<div style="font-size: 48px; font-weight: bold; margin-bottom: 20px;">00:00:00</div>
+		<p style="color: #666; margin-bottom: 30px;">No active timer</p>
+		<form hx-post="/timer/start" hx-target="#timer-container" hx-swap="innerHTML" style="display: flex; gap: 10px; justify-content: center;">
+			<input type="text" name="tag" placeholder="What are you working on?" required style="padding: 10px; width: 300px; font-size: 16px;"/>
+			<button type="submit" style="padding: 10px 20px; font-size: 16px; cursor: pointer;">Start Timer</button>
+		</form>
+	</div>
+}
+
+templ TimerRunning(session *models.TimerSession, elapsed int64) {
+	<div hx-get="/timer/current" hx-trigger="every 1s" hx-target="#timer-container" hx-swap="innerHTML" style="text-align: center; padding: 40px;">
+		<div style="font-size: 64px; font-weight: bold; margin-bottom: 20px; color: #2563eb;">{ formatDuration(elapsed) }</div>
+		<p style="font-size: 24px; margin-bottom: 30px;">Tag: <strong>{ session.Tag }</strong></p>
+		<div style="display: flex; gap: 10px; justify-content: center;">
+			<button hx-post="/timer/stop" hx-target="#timer-container" hx-swap="innerHTML" style="padding: 12px 24px; font-size: 16px; cursor: pointer; background-color: #dc2626; color: white; border: none; border-radius: 4px;">Stop Timer</button>
+			<button hx-post="/timer/reset" hx-target="#timer-container" hx-swap="innerHTML" hx-confirm="Are you sure? Progress will be lost." style="padding: 12px 24px; font-size: 16px; cursor: pointer; background-color: #64748b; color: white; border: none; border-radius: 4px;">Reset Timer</button>
+		</div>
+	</div>
 }
