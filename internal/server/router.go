@@ -40,7 +40,7 @@ func (s *Server) indexHandler(c *gin.Context) {
 	gothUser, err := s.auth.GetUserFromSession(c.Request)
 	if err != nil || gothUser == nil {
 		// No user logged in, show index page with login button
-		component := templates.IndexPage()
+		component := templates.LoginPage()
 		if err = component.Render(context.Background(), c.Writer); err != nil {
 			log.Printf("Error rendering index page: %v", err)
 			c.String(http.StatusInternalServerError, "Error rendering page")
@@ -59,8 +59,8 @@ func (s *Server) indexHandler(c *gin.Context) {
 
 	if user == nil {
 		// User not in database, show login page
-		component := templates.IndexPage()
-		if err := component.Render(context.Background(), c.Writer); err != nil {
+		component := templates.LoginPage()
+		if err = component.Render(context.Background(), c.Writer); err != nil {
 			log.Printf("Error rendering index page: %v", err)
 			c.String(http.StatusInternalServerError, "Error rendering page")
 			return
@@ -69,7 +69,7 @@ func (s *Server) indexHandler(c *gin.Context) {
 	}
 
 	// Show user page with user information
-	component := templates.UserPage(*gothUser)
+	component := templates.TimerPage(*gothUser)
 	if err := component.Render(context.Background(), c.Writer); err != nil {
 		log.Printf("Error rendering user page: %v", err)
 		c.String(http.StatusInternalServerError, "Error rendering page")

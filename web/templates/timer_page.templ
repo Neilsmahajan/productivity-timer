@@ -6,7 +6,7 @@ import (
 	"github.com/markbates/goth"
 )
 
-templ UserPage(user goth.User) {
+templ TimerPage(user goth.User) {
 	<p><a href={ fmt.Sprintf("/logout/%s", user.Provider) }>logout</a></p>
 	<p>Name: { user.Name }[{ user.LastName }, { user.FirstName }]</p>
 	<p>Email: { user.Email }</p>
