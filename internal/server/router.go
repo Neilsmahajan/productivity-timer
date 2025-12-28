@@ -32,6 +32,8 @@ func (s *Server) RegisterRoutes() http.Handler {
 
 	r.POST("/timer/start", s.startTimerHandler)
 
+	r.GET("/timer/current", s.getCurrentTimerHandler)
+
 	return r
 }
 
@@ -71,7 +73,7 @@ func (s *Server) indexHandler(c *gin.Context) {
 	// Show user page with user information
 	// TODO: Get active timer session from database once implemented
 	component := templates.TimerPage(*gothUser, nil)
-	if err := component.Render(context.Background(), c.Writer); err != nil {
+	if err = component.Render(context.Background(), c.Writer); err != nil {
 		log.Printf("Error rendering user page: %v", err)
 		c.String(http.StatusInternalServerError, "Error rendering page")
 		return

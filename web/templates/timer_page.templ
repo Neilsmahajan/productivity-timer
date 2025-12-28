@@ -55,7 +55,7 @@ templ TimerIdle() {
 }
 
 templ TimerRunning(session *models.TimerSession, elapsed int64) {
-	<div hx-get="/timer/current" hx-trigger="every 1s" hx-target="#timer-container" hx-swap="innerHTML" style="text-align: center; padding: 40px;">
+	<div hx-get={ fmt.Sprintf("/timer/current?tag=%s", session.Tag) } hx-trigger="every 1s" hx-target="#timer-container" hx-swap="innerHTML" style="text-align: center; padding: 40px;">
 		<div style="font-size: 64px; font-weight: bold; margin-bottom: 20px; color: #2563eb;">{ formatDuration(elapsed) }</div>
 		<p style="font-size: 24px; margin-bottom: 30px;">Tag: <strong>{ session.Tag }</strong></p>
 		<div style="display: flex; gap: 10px; justify-content: center;">

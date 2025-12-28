@@ -18,6 +18,8 @@ type Service interface {
 	Health() map[string]string
 	FindOrCreateUser(ctx context.Context, user *models.User) (*models.User, error)
 	GetUserByID(ctx context.Context, id string) (*models.User, error)
+	UpsertTimerSession(ctx context.Context, timerSession *models.TimerSession) error
+	GetTimerSessionByID(ctx context.Context, id string) (*models.TimerSession, error)
 }
 
 type service struct {
@@ -65,6 +67,10 @@ func (s *service) Health() map[string]string {
 
 func (s *service) getUsersCollection() *mongo.Collection {
 	return s.db.Database(database).Collection("users")
+}
+
+func (s *service) getTimerSessionsCollection() *mongo.Collection {
+	return s.db.Database(database).Collection("timers")
 }
 
 func (s *service) FindOrCreateUser(ctx context.Context, user *models.User) (*models.User, error) {
@@ -130,4 +136,47 @@ func (s *service) GetUserByID(ctx context.Context, id string) (*models.User, err
 	}
 
 	return &user, nil
+}
+
+func (s *service) UpsertTimerSession(ctx context.Context, timerSession *models.TimerSession) error {
+	collection := s.getTimerSessionsCollection()
+	filter := bson.M{"_id": timerSession.ID}
+
+	err := collection.FindOne(ctx, filter).Decode(&timerSession)
+	if err == nil {
+		update := bson.M{
+			"$set": bson.M{
+				"last_login_at": time.Now(),
+				"duration":      timerSession.StartTime.Sub(time.Now()),
+			},
+		}
+		_, err = collection.UpdateOne(ctx, filter, update)
+		if err != nil {
+			return fmt.Errorf("failed to update timer session: %w", err)
+		}
+		return nil
+	}
+
+	if err != mongo.ErrNoDocuments {
+		return fmt.Errorf("database error: %w", err)
+	}
+	_, err = collection.InsertOne(ctx, timerSession)
+	if err != nil {
+		return fmt.Errorf("failed to insert timer session: %w", err)
+	}
+
+	return nil
+}
+
+func (s *service) GetTimerSessionByID(ctx context.Context, id string) (*models.TimerSession, error) {
+	collection := s.getTimerSessionsCollection()
+	var timerSession models.TimerSession
+	err := collection.FindOne(ctx, bson.M{"_id": id}).Decode(&timerSession)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, nil
+		}
+	}
+	timerSession.Duration = (int64)(time.Now().Sub(timerSession.StartTime).Seconds())
+	return &timerSession, nil
 }

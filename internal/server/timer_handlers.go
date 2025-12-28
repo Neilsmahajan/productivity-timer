@@ -17,9 +17,36 @@ func (s *Server) startTimerHandler(c *gin.Context) {
 		})
 	}
 
-	tag := c.Param("tag")
+	tag := c.PostForm("tag")
 	timerSession := models.NewTimerSession(gothUser.UserID, tag)
+
+	// upsert timer session
+	if err = s.db.UpsertTimerSession(context.Background(), timerSession); err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{})
+	}
+
 	component := templates.TimerRunning(timerSession, 0)
+	c.Header("Content-Type", "text/html; charset=utf-8")
+	if err = component.Render(context.Background(), c.Writer); err != nil {
+		return
+	}
+}
+
+func (s *Server) getCurrentTimerHandler(c *gin.Context) {
+	_, err := s.auth.GetUserFromSession(c.Request)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+			"success": false,
+		})
+	}
+
+	tag := c.Query("tag")
+	timerSession, err := s.db.GetTimerSessionByID(context.Background(), tag)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{})
+	}
+
+	component := templates.TimerRunning(timerSession, timerSession.Duration)
 	c.Header("Content-Type", "text/html; charset=utf-8")
 	if err = component.Render(context.Background(), c.Writer); err != nil {
 		return
