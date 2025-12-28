@@ -33,7 +33,7 @@ func (s *Server) startTimerHandler(c *gin.Context) {
 }
 
 func (s *Server) getCurrentTimerHandler(c *gin.Context) {
-	_, err := s.auth.GetUserFromSession(c.Request)
+	gothUser, err := s.auth.GetUserFromSession(c.Request)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 			"success": false,
@@ -41,9 +41,12 @@ func (s *Server) getCurrentTimerHandler(c *gin.Context) {
 	}
 
 	tag := c.Query("tag")
-	timerSession, err := s.db.GetTimerSessionByID(context.Background(), tag)
+	timerSession, err := s.db.GetTimerSessionByID(context.Background(), gothUser.UserID, tag)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{})
+	}
+	if timerSession == nil {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{})
 	}
 
 	component := templates.TimerRunning(timerSession, timerSession.Duration)

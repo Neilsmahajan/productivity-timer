@@ -19,7 +19,7 @@ type Service interface {
 	FindOrCreateUser(ctx context.Context, user *models.User) (*models.User, error)
 	GetUserByID(ctx context.Context, id string) (*models.User, error)
 	UpsertTimerSession(ctx context.Context, timerSession *models.TimerSession) error
-	GetTimerSessionByID(ctx context.Context, id string) (*models.TimerSession, error)
+	GetTimerSessionByID(ctx context.Context, userId, tag string) (*models.TimerSession, error)
 }
 
 type service struct {
@@ -168,10 +168,10 @@ func (s *service) UpsertTimerSession(ctx context.Context, timerSession *models.T
 	return nil
 }
 
-func (s *service) GetTimerSessionByID(ctx context.Context, id string) (*models.TimerSession, error) {
+func (s *service) GetTimerSessionByID(ctx context.Context, userId, tag string) (*models.TimerSession, error) {
 	collection := s.getTimerSessionsCollection()
 	var timerSession models.TimerSession
-	err := collection.FindOne(ctx, bson.M{"_id": id}).Decode(&timerSession)
+	err := collection.FindOne(ctx, bson.M{"user_id": userId, "tag": tag}).Decode(&timerSession)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return nil, nil
