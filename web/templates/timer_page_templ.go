@@ -195,14 +195,14 @@ func TimerRunning(session *models.TimerSession, elapsed int64) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</strong></p><div style=\"display: flex; gap: 10px; justify-content: center;\"><button hx-post=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</strong></p><div style=\"display: flex; gap: 10px; justify-content: center;\"><button hx-post=\"/timer/stop\" hx-vals=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var10 string
-		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/timer/stop?tag=%s", session.Tag))
+		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("{\"tag\": \"%s\"}", session.Tag))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/timer_page.templ`, Line: 62, Col: 67}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/timer_page.templ`, Line: 62, Col: 88}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {

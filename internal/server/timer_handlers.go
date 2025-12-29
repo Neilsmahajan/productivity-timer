@@ -44,6 +44,9 @@ func (s *Server) getCurrentTimerHandler(c *gin.Context) {
 	}
 
 	tag := c.Query("tag")
+	if tag == "" {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{})
+	}
 	timerSession, err := s.db.FindOrCreateTimerSession(context.Background(), gothUser.UserID, tag)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{})
@@ -65,7 +68,10 @@ func (s *Server) stopTimerHandler(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{})
 	}
 
-	tag := c.Query("tag")
+	tag := c.PostForm("tag")
+	if tag == "" {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{})
+	}
 	timerSession, err := s.db.FindOrCreateTimerSession(context.Background(), gothUser.UserID, tag)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{})
