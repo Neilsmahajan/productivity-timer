@@ -2,8 +2,8 @@ package database
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"time"
 
 	"github.com/neilsmahajan/productivity-timer/internal/models"
 	"go.mongodb.org/mongo-driver/bson"
@@ -14,51 +14,51 @@ func (s *service) getTagStatsCollection() *mongo.Collection {
 	return s.db.Database(database).Collection("tagstats")
 }
 
-func (s *service) UpdateTagStats(ctx context.Context, userTagStats *models.UserTagStats, elapsed int64) error {
+func (s *service) UpdateTagStats(ctx context.Context, userTagStats *models.UserTagStats) error {
 	collection := s.getTagStatsCollection()
-	update := bson.M{
-		"$set": bson.M{
-			"total_duration": userTagStats.TotalDuration + elapsed,
-			"last_updated":   time.Now(),
-			"session_count":  userTagStats.SessionCount + 1,
-		},
-	}
+	filter := bson.M{"_id": userTagStats.ID}
+	update := bson.M{"$set": bson.M{}}
 
-	if _, err := collection.UpdateOne(ctx, bson.M{"id": userTagStats.ID}, update); err != nil {
+	if _, err := collection.UpdateOne(ctx, filter, update); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (s *service) FindOrCreateTagStats(ctx context.Context, userId string, tag string) (*models.UserTagStats, error) {
+func (s *service) CreateTagStats(ctx context.Context, userTagStats *models.UserTagStats) error {
 	collection := s.getTagStatsCollection()
+	_, err := collection.InsertOne(ctx, userTagStats)
+	if err != nil {
+		return fmt.Errorf("failed to insert new tag stats: %w", err)
+	}
+	return nil
+}
 
+func (s *service) FindTagStats(ctx context.Context, userId, tag string) (*models.UserTagStats, error) {
+	collection := s.getTagStatsCollection()
 	filter := bson.M{
 		"user_id": userId,
 		"tag":     tag,
 	}
 
 	var existingTagStats models.UserTagStats
-	err := collection.FindOne(ctx, filter).Decode(&existingTagStats)
-	if err == nil {
-		update := bson.M{
-			"$set": bson.M{
-				"last_updated": time.Now(),
-			},
-		}
-		_, err = collection.UpdateOne(ctx, filter, update)
-		if err != nil {
-			return nil, fmt.Errorf("failed to update user: %w", err)
-		}
-		return &existingTagStats, nil
+	if err := collection.FindOne(ctx, filter).Decode(&existingTagStats); err != nil {
+		return nil, err
 	}
 
-	newTagStats := models.NewUserTagStats(userId, tag)
-	_, err = collection.InsertOne(ctx, newTagStats)
-	if err != nil {
-		return nil, fmt.Errorf("failed to insert new tag stats: %w", err)
-	}
+	return &existingTagStats, nil
+}
 
-	return newTagStats, nil
+func (s *service) FindOrCreateTagStats(ctx context.Context, userID, tag string) (*models.UserTagStats, error) {
+	userTagStats, err := s.FindTagStats(ctx, userID, tag)
+	if errors.Is(err, mongo.ErrNoDocuments) {
+		userTagStats = models.NewUserTagStats(userID, tag)
+		if err = s.CreateTagStats(ctx, userTagStats); err != nil {
+			return nil, err
+		}
+	} else if err != nil {
+		return nil, err
+	}
+	return userTagStats, nil
 }

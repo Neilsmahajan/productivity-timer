@@ -13,7 +13,7 @@ func (s *Server) getGothUserAndTag(c *gin.Context) (*goth.User, string, error) {
 		return nil, "", err
 	}
 
-	tag := c.Param("tag")
+	tag := c.PostForm("tag")
 	if tag == "" {
 		return nil, "", errors.New("tag required")
 	}

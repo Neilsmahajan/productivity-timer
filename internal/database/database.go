@@ -19,9 +19,12 @@ type Service interface {
 	GetUserByID(ctx context.Context, id string) (*models.User, error)
 	UpdateTimerSession(ctx context.Context, timerSession *models.TimerSession) error
 	CreateTimerSession(ctx context.Context, timerSession *models.TimerSession) error
-	GetTimerSession(ctx context.Context, userId, tag string) (*models.TimerSession, error)
-	UpdateTagStats(ctx context.Context, userTagStats *models.UserTagStats, elapsed int64) error
-	FindOrCreateTagStats(ctx context.Context, userId, tag string) (*models.UserTagStats, error)
+	FindTimerSession(ctx context.Context, userId, tag string) (*models.TimerSession, error)
+	FindOrCreateTimerSession(ctx context.Context, userId, tag string) (*models.TimerSession, error)
+	UpdateTagStats(ctx context.Context, userTagStats *models.UserTagStats) error
+	CreateTagStats(ctx context.Context, userTagStats *models.UserTagStats) error
+	FindTagStats(ctx context.Context, userId string, tag string) (*models.UserTagStats, error)
+	FindOrCreateTagStats(ctx context.Context, userID, tag string) (*models.UserTagStats, error)
 }
 
 type service struct {
