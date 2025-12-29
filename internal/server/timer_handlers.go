@@ -74,7 +74,7 @@ func (s *Server) stopTimerHandler(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{})
 	}
 
-	elapsedTime := int64(time.Now().Sub(timerSession.LastUpdated))
+	elapsedTime := int64(time.Now().Sub(timerSession.LastUpdated).Seconds())
 
 	timerSession.Duration += elapsedTime
 	timerSession.Status = "stopped"
@@ -95,7 +95,7 @@ func (s *Server) stopTimerHandler(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{})
 	}
 
-	component := templates.TimerRunning(timerSession, timerSession.Duration)
+	component := templates.TimerStopped(timerSession, timerSession.Duration)
 	c.Header("Content-Type", "text/html; charset=utf-8")
 	if err = component.Render(context.Background(), c.Writer); err != nil {
 		return
