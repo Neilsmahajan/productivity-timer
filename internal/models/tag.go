@@ -21,7 +21,7 @@ func NewUserTagStats(userID, tag string) *UserTagStats {
 		UserID:        userID,
 		Tag:           tag,
 		TotalDuration: 0,
-		SessionCount:  0,
+		SessionCount:  1,
 		LastUpdated:   time.Now(),
 	}
 }

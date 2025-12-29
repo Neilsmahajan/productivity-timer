@@ -17,9 +17,8 @@ func (s *service) getTagStatsCollection() *mongo.Collection {
 func (s *service) UpdateTagStats(ctx context.Context, userTagStats *models.UserTagStats) error {
 	collection := s.getTagStatsCollection()
 	filter := bson.M{"_id": userTagStats.ID}
-	update := bson.M{"$set": bson.M{}}
 
-	if _, err := collection.UpdateOne(ctx, filter, update); err != nil {
+	if _, err := collection.UpdateOne(ctx, filter, bson.M{"$set": userTagStats}); err != nil {
 		return err
 	}
 

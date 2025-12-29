@@ -21,12 +21,6 @@ func (s *Server) startTimerHandler(c *gin.Context) {
 	}
 	fmt.Printf("start timer handler, gothUser: %s, gothTag: %s", gothUser, tag)
 
-	// Find or create tag
-	if _, err = s.db.FindOrCreateTagStats(c, gothUser.UserID, tag); err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{})
-		return
-	}
-
 	timerSession, err := s.db.FindTimerSession(c.Request.Context(), gothUser.UserID, tag)
 	if errors.Is(err, mongo.ErrNoDocuments) {
 		fmt.Println("find timer session not found")
@@ -129,7 +123,6 @@ func (s *Server) stopTimerHandler(c *gin.Context) {
 
 	userTagStats.LastUpdated = time.Now()
 	userTagStats.TotalDuration += elapsedTime
-	userTagStats.SessionCount++
 
 	if err = s.db.UpdateTagStats(context.Background(), userTagStats); err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{})
@@ -144,9 +137,46 @@ func (s *Server) stopTimerHandler(c *gin.Context) {
 }
 
 func (s *Server) resetTimerHandler(c *gin.Context) {
-	_, _, err := s.getGothUserAndTag(c)
+	gothUser, tag, err := s.getGothUserAndTag(c)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{})
 		return
 	}
+
+	timerSession, err := s.db.FindTimerSession(context.Background(), gothUser.UserID, tag)
+	if err != nil || timerSession == nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{})
+		return
+	}
+
+	currentTime := time.Now()
+	elapsedTime := int64(currentTime.Sub(timerSession.LastUpdated).Seconds())
+	timerSession.Duration = elapsedTime
+	timerSession.Status = "completed"
+	timerSession.LastUpdated = currentTime
+	timerSession.EndTime = &currentTime
+	if err = s.db.UpdateTimerSession(context.Background(), timerSession); err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{})
+		return
+	}
+
+	userTagStats, err := s.db.FindTagStats(context.Background(), gothUser.UserID, tag)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{})
+		return
+	}
+
+	userTagStats.LastUpdated = currentTime
+	userTagStats.TotalDuration += elapsedTime
+
+	if err = s.db.UpdateTagStats(context.Background(), userTagStats); err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{})
+		return
+	}
+
+	component := templates.TimerIdle()
+	if err = component.Render(context.Background(), c.Writer); err != nil {
+		return
+	}
+	return
 }

@@ -74,9 +74,7 @@ func (s *Server) indexHandler(c *gin.Context) {
 		return
 	}
 
-	// Show user page with user information
-	// TODO: Get active timer session from database once implemented
-	component := templates.TimerPage(*gothUser, nil)
+	component := templates.TimerPage(gothUser, nil)
 	if err = component.Render(context.Background(), c.Writer); err != nil {
 		log.Printf("Error rendering user page: %v", err)
 		c.String(http.StatusInternalServerError, "Error rendering page")
