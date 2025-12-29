@@ -19,7 +19,7 @@ type Service interface {
 	GetUserByID(ctx context.Context, id string) (*models.User, error)
 	UpdateTimerSession(ctx context.Context, timerSession *models.TimerSession) error
 	CreateTimerSession(ctx context.Context, timerSession *models.TimerSession) error
-	FindOrCreateTimerSession(ctx context.Context, userId, tag string) (*models.TimerSession, error)
+	GetTimerSession(ctx context.Context, userId, tag string) (*models.TimerSession, error)
 	UpdateTagStats(ctx context.Context, userTagStats *models.UserTagStats, elapsed int64) error
 	FindOrCreateTagStats(ctx context.Context, userId, tag string) (*models.UserTagStats, error)
 }
