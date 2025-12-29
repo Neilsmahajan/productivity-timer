@@ -70,7 +70,7 @@ templ TimerStopped(session *models.TimerSession, elapsed int64) {
 		<div style="font-size: 64px; font-weight: bold; margin-bottom: 20px; color: #2563eb;">{ formatDuration(elapsed) }</div>
 		<p style="font-size: 24px; margin-bottom: 30px;">Tag: <strong>{ session.Tag }</strong></p>
 		<div style="display: flex; gap: 10px; justify-content: center;">
-			<button hx-post={ fmt.Sprintf("/timer/start?tag=%s", session.Tag) } hx-target="#timer-container" hx-swap="innerHTML" style="padding: 12px 24px; font-size: 16px; cursor: pointer; background-color: #dc2626; color: white; border: none; border-radius: 4px;">Start Timer</button>
+			<button hx-post={ fmt.Sprintf("/timer/start?tag=%s", session.Tag) } hx-target="#timer-container" hx-swap="innerHTML" style="padding: 12px 24px; font-size: 16px; cursor: pointer; background-color: #16a34a; color: white; border: none; border-radius: 4px;">Start Timer</button>
 			<button hx-post="/timer/reset" hx-target="#timer-container" hx-swap="innerHTML" hx-confirm="Are you sure? Progress will be lost." style="padding: 12px 24px; font-size: 16px; cursor: pointer; background-color: #64748b; color: white; border: none; border-radius: 4px;">Reset Timer</button>
 		</div>
 	</div>
