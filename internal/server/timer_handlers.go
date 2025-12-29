@@ -13,16 +13,9 @@ import (
 )
 
 func (s *Server) startTimerHandler(c *gin.Context) {
-	gothUser, err := s.auth.GetUserFromSession(c.Request)
+	gothUser, tag, err := s.getGothUserAndTag(c)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-			"success": false,
-		})
-	}
-
-	tag := c.PostForm("tag")
-	if tag == "" {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{})
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{})
 	}
 
 	timerSession, err := s.db.GetTimerSession(c.Request.Context(), gothUser.UserID, tag)
@@ -58,15 +51,11 @@ func (s *Server) startTimerHandler(c *gin.Context) {
 }
 
 func (s *Server) getCurrentTimerHandler(c *gin.Context) {
-	gothUser, err := s.auth.GetUserFromSession(c.Request)
+	gothUser, tag, err := s.getGothUserAndTag(c)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{})
 	}
 
-	tag := c.Query("tag")
-	if tag == "" {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{})
-	}
 	timerSession, err := s.db.GetTimerSession(context.Background(), gothUser.UserID, tag)
 	if err != nil || timerSession == nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{})
@@ -82,15 +71,11 @@ func (s *Server) getCurrentTimerHandler(c *gin.Context) {
 }
 
 func (s *Server) stopTimerHandler(c *gin.Context) {
-	gothUser, err := s.auth.GetUserFromSession(c.Request)
+	gothUser, tag, err := s.getGothUserAndTag(c)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{})
 	}
 
-	tag := c.PostForm("tag")
-	if tag == "" {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{})
-	}
 	timerSession, err := s.db.GetTimerSession(context.Background(), gothUser.UserID, tag)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{})
@@ -125,4 +110,13 @@ func (s *Server) stopTimerHandler(c *gin.Context) {
 	if err = component.Render(context.Background(), c.Writer); err != nil {
 		return
 	}
+}
+
+func (s *Server) resetTimerHandler(c *gin.Context) {
+	_, _, err := s.getGothUserAndTag(c)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{})
+	}
+
+	return
 }
