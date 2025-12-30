@@ -74,7 +74,7 @@ func (s *Server) indexHandler(c *gin.Context) {
 		return
 	}
 
-	component := templates.TimerPage(gothUser, nil)
+	component := templates.IndexPage(gothUser, nil)
 	if err = component.Render(context.Background(), c.Writer); err != nil {
 		log.Printf("Error rendering user page: %v", err)
 		c.String(http.StatusInternalServerError, "Error rendering page")
