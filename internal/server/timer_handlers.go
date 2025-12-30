@@ -30,10 +30,10 @@ func (s *Server) startTimerHandler(c *gin.Context) {
 			return
 		}
 
-		userTagStats, err2 := s.db.FindTagStats(c.Request.Context(), gothUser.UserID, tag)
+		userTagStats, err2 := s.db.FindUserTagStats(c.Request.Context(), gothUser.UserID, tag)
 		if errors.Is(err2, mongo.ErrNoDocuments) {
 			userTagStats = models.NewUserTagStats(gothUser.UserID, tag)
-			if err2 = s.db.CreateTagStats(c.Request.Context(), userTagStats); err2 != nil {
+			if err2 = s.db.CreateUserTagStats(c.Request.Context(), userTagStats); err2 != nil {
 				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{})
 				return
 			}
@@ -43,7 +43,7 @@ func (s *Server) startTimerHandler(c *gin.Context) {
 		} else {
 			userTagStats.SessionCount++
 			userTagStats.LastUpdated = time.Now()
-			if err2 = s.db.UpdateTagStats(c.Request.Context(), userTagStats); err2 != nil {
+			if err2 = s.db.UpdateUserTagStats(c.Request.Context(), userTagStats); err2 != nil {
 				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{})
 				return
 			}
@@ -124,7 +124,7 @@ func (s *Server) stopTimerHandler(c *gin.Context) {
 		return
 	}
 
-	userTagStats, err := s.db.FindTagStats(context.Background(), gothUser.UserID, tag)
+	userTagStats, err := s.db.FindUserTagStats(context.Background(), gothUser.UserID, tag)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{})
 		return
@@ -133,7 +133,7 @@ func (s *Server) stopTimerHandler(c *gin.Context) {
 	userTagStats.LastUpdated = time.Now()
 	userTagStats.TotalDuration += elapsedTime
 
-	if err = s.db.UpdateTagStats(context.Background(), userTagStats); err != nil {
+	if err = s.db.UpdateUserTagStats(context.Background(), userTagStats); err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{})
 		return
 	}
@@ -169,7 +169,7 @@ func (s *Server) resetTimerHandler(c *gin.Context) {
 		return
 	}
 
-	userTagStats, err := s.db.FindTagStats(context.Background(), gothUser.UserID, tag)
+	userTagStats, err := s.db.FindUserTagStats(context.Background(), gothUser.UserID, tag)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{})
 		return
@@ -178,7 +178,7 @@ func (s *Server) resetTimerHandler(c *gin.Context) {
 	userTagStats.LastUpdated = currentTime
 	userTagStats.TotalDuration += elapsedTime
 
-	if err = s.db.UpdateTagStats(context.Background(), userTagStats); err != nil {
+	if err = s.db.UpdateUserTagStats(context.Background(), userTagStats); err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{})
 		return
 	}

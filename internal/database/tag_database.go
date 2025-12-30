@@ -2,7 +2,6 @@ package database
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	"github.com/neilsmahajan/productivity-timer/internal/models"
@@ -10,12 +9,12 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func (s *service) getTagStatsCollection() *mongo.Collection {
+func (s *service) getUserTagStatsCollection() *mongo.Collection {
 	return s.db.Database(database).Collection("tagstats")
 }
 
-func (s *service) UpdateTagStats(ctx context.Context, userTagStats *models.UserTagStats) error {
-	collection := s.getTagStatsCollection()
+func (s *service) UpdateUserTagStats(ctx context.Context, userTagStats *models.UserTagStats) error {
+	collection := s.getUserTagStatsCollection()
 	filter := bson.M{"_id": userTagStats.ID}
 
 	if _, err := collection.UpdateOne(ctx, filter, bson.M{"$set": userTagStats}); err != nil {
@@ -25,8 +24,8 @@ func (s *service) UpdateTagStats(ctx context.Context, userTagStats *models.UserT
 	return nil
 }
 
-func (s *service) CreateTagStats(ctx context.Context, userTagStats *models.UserTagStats) error {
-	collection := s.getTagStatsCollection()
+func (s *service) CreateUserTagStats(ctx context.Context, userTagStats *models.UserTagStats) error {
+	collection := s.getUserTagStatsCollection()
 	_, err := collection.InsertOne(ctx, userTagStats)
 	if err != nil {
 		return fmt.Errorf("failed to insert new tag stats: %w", err)
@@ -34,8 +33,8 @@ func (s *service) CreateTagStats(ctx context.Context, userTagStats *models.UserT
 	return nil
 }
 
-func (s *service) FindTagStats(ctx context.Context, userId, tag string) (*models.UserTagStats, error) {
-	collection := s.getTagStatsCollection()
+func (s *service) FindUserTagStats(ctx context.Context, userId, tag string) (*models.UserTagStats, error) {
+	collection := s.getUserTagStatsCollection()
 	filter := bson.M{
 		"user_id": userId,
 		"tag":     tag,
@@ -47,17 +46,4 @@ func (s *service) FindTagStats(ctx context.Context, userId, tag string) (*models
 	}
 
 	return &existingTagStats, nil
-}
-
-func (s *service) FindOrCreateTagStats(ctx context.Context, userID, tag string) (*models.UserTagStats, error) {
-	userTagStats, err := s.FindTagStats(ctx, userID, tag)
-	if errors.Is(err, mongo.ErrNoDocuments) {
-		userTagStats = models.NewUserTagStats(userID, tag)
-		if err = s.CreateTagStats(ctx, userTagStats); err != nil {
-			return nil, err
-		}
-	} else if err != nil {
-		return nil, err
-	}
-	return userTagStats, nil
 }

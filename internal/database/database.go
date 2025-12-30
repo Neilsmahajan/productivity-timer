@@ -20,10 +20,9 @@ type Service interface {
 	UpdateTimerSession(ctx context.Context, timerSession *models.TimerSession) error
 	CreateTimerSession(ctx context.Context, timerSession *models.TimerSession) error
 	FindTimerSession(ctx context.Context, userId, tag, status string) (*models.TimerSession, error)
-	UpdateTagStats(ctx context.Context, userTagStats *models.UserTagStats) error
-	CreateTagStats(ctx context.Context, userTagStats *models.UserTagStats) error
-	FindTagStats(ctx context.Context, userId string, tag string) (*models.UserTagStats, error)
-	FindOrCreateTagStats(ctx context.Context, userID, tag string) (*models.UserTagStats, error)
+	UpdateUserTagStats(ctx context.Context, userTagStats *models.UserTagStats) error
+	CreateUserTagStats(ctx context.Context, userTagStats *models.UserTagStats) error
+	FindUserTagStats(ctx context.Context, userId string, tag string) (*models.UserTagStats, error)
 }
 
 type service struct {
