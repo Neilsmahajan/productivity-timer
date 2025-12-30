@@ -1,0 +1,31 @@
+package templates
+
+import "fmt"
+
+templ PreviousTagsDropdown(tags []string) {
+	<div x-data="{ open: false }">
+		<button @click="open = !open">Previous Tags</button>
+		<div x-show="open" @click.outside="open = false">
+			@SelectPreviousTags(tags)
+		</div>
+	</div>
+}
+
+templ SelectPreviousTags(tags []string) {
+	<div
+		x-data={ fmt.Sprintf(`{
+			search: '',
+			items: %s,
+			get filteredItems() {
+				return this.items.filter(item => item.toLowerCase().startsWith(this.search.toLowerCase()));
+			}
+		}`, func() string { s, _ := templ.JSONString(tags); return s }()) }
+	>
+		<input x-model="search" placeholder="Search..."/>
+		<ul>
+			<template x-for="item in filteredItems" :key="item">
+				<li x-text="item"></li>
+			</template>
+		</ul>
+	</div>
+}
