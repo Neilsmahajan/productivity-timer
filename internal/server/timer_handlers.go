@@ -21,35 +21,44 @@ func (s *Server) startTimerHandler(c *gin.Context) {
 	}
 	fmt.Printf("start timer handler, gothUser: %s, gothTag: %s", gothUser, tag)
 
-	timerSession, err := s.db.FindTimerSession(c.Request.Context(), gothUser.UserID, tag)
+	timerSession, err := s.db.FindTimerSession(c.Request.Context(), gothUser.UserID, tag, models.StatusStopped)
 	if errors.Is(err, mongo.ErrNoDocuments) {
-		fmt.Println("find timer session not found")
 		timerSession = models.NewTimerSession(gothUser.UserID, tag)
 
-		// upsert timer session
 		if err = s.db.CreateTimerSession(context.Background(), timerSession); err != nil {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{})
 			return
 		}
-		component := templates.TimerRunning(timerSession, 0)
-		c.Header("Content-Type", "text/html; charset=utf-8")
-		if err = component.Render(context.Background(), c.Writer); err != nil {
+
+		userTagStats, err2 := s.db.FindTagStats(c.Request.Context(), gothUser.UserID, tag)
+		if errors.Is(err2, mongo.ErrNoDocuments) {
+			userTagStats = models.NewUserTagStats(gothUser.UserID, tag)
+			if err2 = s.db.CreateTagStats(c.Request.Context(), userTagStats); err2 != nil {
+				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{})
+				return
+			}
+		} else if err2 != nil {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{})
 			return
+		} else {
+			userTagStats.SessionCount++
+			userTagStats.LastUpdated = time.Now()
+			if err2 = s.db.UpdateTagStats(c.Request.Context(), userTagStats); err2 != nil {
+				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{})
+				return
+			}
 		}
-		return
 	} else if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{})
 		return
-	}
-	fmt.Println("found timerSession:", timerSession)
+	} else {
+		timerSession.Status = models.StatusRunning
+		timerSession.LastUpdated = time.Now()
 
-	timerSession.Status = "running"
-	timerSession.LastUpdated = time.Now()
-
-	if err = s.db.UpdateTimerSession(context.Background(), timerSession); err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{})
-		return
+		if err = s.db.UpdateTimerSession(context.Background(), timerSession); err != nil {
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{})
+			return
+		}
 	}
 
 	component := templates.TimerRunning(timerSession, timerSession.Duration)
@@ -73,7 +82,7 @@ func (s *Server) getCurrentTimerHandler(c *gin.Context) {
 		return
 	}
 
-	timerSession, err := s.db.FindTimerSession(context.Background(), gothUser.UserID, tag)
+	timerSession, err := s.db.FindTimerSession(context.Background(), gothUser.UserID, tag, models.StatusRunning)
 	if err != nil || timerSession == nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{})
 		return
@@ -95,7 +104,7 @@ func (s *Server) stopTimerHandler(c *gin.Context) {
 		return
 	}
 
-	timerSession, err := s.db.FindTimerSession(context.Background(), gothUser.UserID, tag)
+	timerSession, err := s.db.FindTimerSession(context.Background(), gothUser.UserID, tag, models.StatusRunning)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{})
 		return
@@ -108,7 +117,7 @@ func (s *Server) stopTimerHandler(c *gin.Context) {
 	elapsedTime := int64(time.Now().Sub(timerSession.LastUpdated).Seconds())
 
 	timerSession.Duration += elapsedTime
-	timerSession.Status = "stopped"
+	timerSession.Status = models.StatusStopped
 	timerSession.LastUpdated = time.Now()
 	if err = s.db.UpdateTimerSession(context.Background(), timerSession); err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{})
@@ -143,7 +152,7 @@ func (s *Server) resetTimerHandler(c *gin.Context) {
 		return
 	}
 
-	timerSession, err := s.db.FindTimerSession(context.Background(), gothUser.UserID, tag)
+	timerSession, err := s.db.FindTimerSession(context.Background(), gothUser.UserID, tag, models.StatusStopped)
 	if err != nil || timerSession == nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{})
 		return
@@ -152,7 +161,7 @@ func (s *Server) resetTimerHandler(c *gin.Context) {
 	currentTime := time.Now()
 	elapsedTime := int64(currentTime.Sub(timerSession.LastUpdated).Seconds())
 	timerSession.Duration = elapsedTime
-	timerSession.Status = "completed"
+	timerSession.Status = models.StatusCompleted
 	timerSession.LastUpdated = currentTime
 	timerSession.EndTime = &currentTime
 	if err = s.db.UpdateTimerSession(context.Background(), timerSession); err != nil {

@@ -2,7 +2,6 @@ package database
 
 import (
 	"context"
-	"errors"
 
 	"github.com/neilsmahajan/productivity-timer/internal/models"
 	"go.mongodb.org/mongo-driver/bson"
@@ -33,26 +32,13 @@ func (s *service) CreateTimerSession(ctx context.Context, timerSession *models.T
 	return nil
 }
 
-func (s *service) FindTimerSession(ctx context.Context, userId, tag string) (*models.TimerSession, error) {
+func (s *service) FindTimerSession(ctx context.Context, userId, tag, status string) (*models.TimerSession, error) {
 	collection := s.getTimerSessionsCollection()
+	filter := bson.M{"user_id": userId, "tag": tag, "status": status}
 	var timerSession models.TimerSession
-	err := collection.FindOne(ctx, bson.M{"user_id": userId, "tag": tag}).Decode(&timerSession)
+	err := collection.FindOne(ctx, filter).Decode(&timerSession)
 	if err != nil {
 		return nil, err
 	}
 	return &timerSession, nil
-}
-
-func (s *service) FindOrCreateTimerSession(ctx context.Context, userId, tag string) (*models.TimerSession, error) {
-	timerSession, err := s.FindTimerSession(ctx, userId, tag)
-	if errors.Is(err, mongo.ErrNoDocuments) {
-		timerSession = models.NewTimerSession(userId, tag)
-		if err = s.CreateTimerSession(ctx, timerSession); err != nil {
-			return nil, err
-		}
-	} else if err != nil {
-		return nil, err
-	}
-
-	return timerSession, nil
 }

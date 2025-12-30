@@ -6,6 +6,12 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+const (
+	StatusRunning   string = "running"
+	StatusStopped   string = "stopped"
+	StatusCompleted string = "completed"
+)
+
 type TimerSession struct {
 	ID          primitive.ObjectID `bson:"_id" json:"id"`
 	UserID      string             `bson:"user_id" json:"userId"`
@@ -25,7 +31,7 @@ func NewTimerSession(userID, tag string) *TimerSession {
 		Tag:         tag,
 		StartTime:   time.Now(),
 		Duration:    0,
-		Status:      "running",
+		Status:      StatusRunning,
 		CreatedAt:   time.Now(),
 		LastUpdated: time.Now(),
 	}
