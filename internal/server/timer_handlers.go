@@ -68,34 +68,6 @@ func (s *Server) startTimerHandler(c *gin.Context) {
 	}
 }
 
-func (s *Server) getCurrentTimerHandler(c *gin.Context) {
-	gothUser, err := s.auth.GetUserFromSession(c.Request)
-	if err != nil {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{})
-		return
-	}
-
-	tag := c.Query("tag")
-	if tag == "" {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{})
-		return
-	}
-
-	timerSession, err := s.db.FindTimerSession(context.Background(), gothUser.UserID, tag, models.StatusRunning)
-	if err != nil || timerSession == nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{})
-		return
-	}
-
-	elapsedTime := int64(time.Now().Sub(timerSession.LastUpdated).Seconds())
-
-	component := templates.TimerRunning(timerSession, timerSession.Duration+elapsedTime)
-	c.Header("Content-Type", "text/html; charset=utf-8")
-	if err = component.Render(context.Background(), c.Writer); err != nil {
-		return
-	}
-}
-
 func (s *Server) stopTimerHandler(c *gin.Context) {
 	gothUser, tag, err := s.getGothUserAndTag(c)
 	if err != nil {

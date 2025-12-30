@@ -32,8 +32,6 @@ func (s *Server) RegisterRoutes() http.Handler {
 
 	r.POST("/timer/start", s.startTimerHandler)
 
-	r.GET("/timer/current", s.getCurrentTimerHandler)
-
 	r.POST("/timer/stop", s.stopTimerHandler)
 
 	r.POST("/timer/reset", s.resetTimerHandler)
