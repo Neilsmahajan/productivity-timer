@@ -26,8 +26,16 @@ templ TimerIdle() {
 }
 
 templ TimerRunning(session *models.TimerSession, elapsed int64) {
-	<div hx-get={ fmt.Sprintf("/timer/current?tag=%s", session.Tag) } hx-trigger="every 1s" hx-target="#timer-container" hx-swap="innerHTML" style="text-align: center; padding: 40px;">
-		<div style="font-size: 64px; font-weight: bold; margin-bottom: 20px; color: #2563eb;">{ formatDuration(elapsed) }</div>
+	<div
+		x-data={ fmt.Sprintf(`{ elapsed: %d, interval: null }`, elapsed) }
+		x-init="interval = setInterval(() => { elapsed++ }, 1000)"
+		@destroy="clearInterval(interval)"
+		style="text-align: center; padding: 40px;"
+	>
+		<div
+			style="font-size: 64px; font-weight: bold; margin-bottom: 20px; color: #2563eb;"
+			x-text="Math.floor(elapsed / 3600).toString().padStart(2, '0') + ':' + Math.floor((elapsed % 3600) / 60).toString().padStart(2, '0') + ':' + (elapsed % 60).toString().padStart(2, '0')"
+		></div>
 		<p style="font-size: 24px; margin-bottom: 30px;">Tag: <strong>{ session.Tag }</strong></p>
 		<div style="display: flex; gap: 10px; justify-content: center;">
 			<button hx-post="/timer/stop" hx-vals={ fmt.Sprintf("{\"tag\": \"%s\"}", session.Tag) } hx-target="#timer-container" hx-swap="innerHTML" style="padding: 12px 24px; font-size: 16px; cursor: pointer; background-color: #dc2626; color: white; border: none; border-radius: 4px;">Stop Timer</button>
