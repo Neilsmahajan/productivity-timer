@@ -3,7 +3,6 @@ package server
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -19,8 +18,8 @@ func (s *Server) startTimerHandler(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{})
 		return
 	}
-	fmt.Printf("start timer handler, gothUser: %s, gothTag: %s", gothUser, tag)
 
+	currentTime := time.Now()
 	timerSession, err := s.db.FindTimerSession(c.Request.Context(), gothUser.UserID, tag, models.StatusStopped)
 	if errors.Is(err, mongo.ErrNoDocuments) {
 		timerSession = models.NewTimerSession(gothUser.UserID, tag)
@@ -42,7 +41,7 @@ func (s *Server) startTimerHandler(c *gin.Context) {
 			return
 		} else {
 			userTagStats.SessionCount++
-			userTagStats.LastUpdated = time.Now()
+			userTagStats.LastUpdated = currentTime
 			if err2 = s.db.UpdateUserTagStats(c.Request.Context(), userTagStats); err2 != nil {
 				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{})
 				return
@@ -53,7 +52,7 @@ func (s *Server) startTimerHandler(c *gin.Context) {
 		return
 	} else {
 		timerSession.Status = models.StatusRunning
-		timerSession.LastUpdated = time.Now()
+		timerSession.LastUpdated = currentTime
 
 		if err = s.db.UpdateTimerSession(context.Background(), timerSession); err != nil {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{})
@@ -114,11 +113,12 @@ func (s *Server) stopTimerHandler(c *gin.Context) {
 		return
 	}
 
-	elapsedTime := int64(time.Now().Sub(timerSession.LastUpdated).Seconds())
+	currentTime := time.Now()
+	elapsedTime := int64(currentTime.Sub(timerSession.LastUpdated).Seconds())
 
 	timerSession.Duration += elapsedTime
 	timerSession.Status = models.StatusStopped
-	timerSession.LastUpdated = time.Now()
+	timerSession.LastUpdated = currentTime
 	if err = s.db.UpdateTimerSession(context.Background(), timerSession); err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{})
 		return
@@ -130,7 +130,7 @@ func (s *Server) stopTimerHandler(c *gin.Context) {
 		return
 	}
 
-	userTagStats.LastUpdated = time.Now()
+	userTagStats.LastUpdated = currentTime
 	userTagStats.TotalDuration += elapsedTime
 
 	if err = s.db.UpdateUserTagStats(context.Background(), userTagStats); err != nil {
