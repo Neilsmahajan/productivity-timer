@@ -131,8 +131,6 @@ func (s *Server) resetTimerHandler(c *gin.Context) {
 	}
 
 	currentTime := time.Now()
-	elapsedTime := int64(currentTime.Sub(timerSession.LastUpdated).Seconds())
-	timerSession.Duration = elapsedTime
 	timerSession.Status = models.StatusCompleted
 	timerSession.LastUpdated = currentTime
 	timerSession.EndTime = &currentTime
@@ -141,23 +139,8 @@ func (s *Server) resetTimerHandler(c *gin.Context) {
 		return
 	}
 
-	userTagStats, err := s.db.FindUserTagStats(context.Background(), gothUser.UserID, tag)
-	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{})
-		return
-	}
-
-	userTagStats.LastUpdated = currentTime
-	userTagStats.TotalDuration += elapsedTime
-
-	if err = s.db.UpdateUserTagStats(context.Background(), userTagStats); err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{})
-		return
-	}
-
 	component := templates.TimerIdle()
 	if err = component.Render(context.Background(), c.Writer); err != nil {
 		return
 	}
-	return
 }

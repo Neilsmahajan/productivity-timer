@@ -67,9 +67,18 @@ func (s *Server) authHandler(c *gin.Context) {
 	// Check if user is already authenticated
 	gothUser, err := s.auth.GetUserFromSession(c.Request)
 	if err == nil && gothUser != nil {
-		// Already authenticated, redirect to index
-		c.Redirect(http.StatusTemporaryRedirect, "/")
-		return
+		// Check if user exists in database
+		user, dbErr := s.db.GetUserByID(c.Request.Context(), gothUser.UserID)
+		if dbErr == nil && user != nil {
+			// User exists in both session and database, redirect to index
+			c.Redirect(http.StatusTemporaryRedirect, "/")
+			return
+		}
+		// User in session but not in database, clear session and re-authenticate
+		log.Printf("User in session but not in database, clearing session")
+		if clearErr := s.auth.ClearUserSession(c.Writer, c.Request); clearErr != nil {
+			log.Printf("Error clearing session: %v", clearErr)
+		}
 	}
 
 	// Not authenticated, begin OAuth flow
