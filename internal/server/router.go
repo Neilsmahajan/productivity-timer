@@ -19,6 +19,8 @@ func (s *Server) RegisterRoutes() http.Handler {
 		AllowCredentials: true, // Enable cookies/auth
 	}))
 
+	r.StaticFile("/favicon.ico", "./favicon.ico")
+
 	r.GET("/", s.indexHandler)
 
 	r.GET("/health", s.healthHandler)
