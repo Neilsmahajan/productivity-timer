@@ -1,0 +1,442 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "A productivity timer application for tracking time spent on various tasks with tags.\nUsers can start/stop/reset timers and view statistics of their productivity sessions.",
+        "title": "Productivity Timer API",
+        "contact": {
+            "name": "API Support",
+            "url": "https://github.com/neilsmahajan/productivity-timer"
+        },
+        "license": {
+            "name": "MIT",
+            "url": "https://opensource.org/licenses/MIT"
+        },
+        "version": "1.0"
+    },
+    "host": "localhost:8080",
+    "basePath": "/api/v1",
+    "paths": {
+        "/api/v1/stats/summary": {
+            "get": {
+                "description": "Returns aggregated statistics for the authenticated user within a date range",
+                "produces": [
+                    "text/html"
+                ],
+                "tags": [
+                    "stats"
+                ],
+                "summary": "Get stats summary",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Start datetime (format: 2006-01-02T15:04)",
+                        "name": "start",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "End datetime (format: 2006-01-02T15:04)",
+                        "name": "end",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "HTML component with stats summary",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_server.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/internal_server.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_server.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/stats/tag/{tag}/sessions": {
+            "get": {
+                "description": "Returns all timer sessions for a specific tag within a date range",
+                "produces": [
+                    "text/html"
+                ],
+                "tags": [
+                    "stats"
+                ],
+                "summary": "Get sessions for a specific tag",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Tag name",
+                        "name": "tag",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Start datetime (format: 2006-01-02T15:04)",
+                        "name": "start",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "End datetime (format: 2006-01-02T15:04)",
+                        "name": "end",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "HTML component with tag sessions",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_server.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/internal_server.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_server.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/stats/tag/{tag}": {
+            "delete": {
+                "description": "Deletes all timer sessions and statistics for a specific tag",
+                "tags": [
+                    "stats"
+                ],
+                "summary": "Delete a tag and all its sessions",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Tag name to delete",
+                        "name": "tag",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Empty response on successful deletion",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_server.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/internal_server.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_server.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/timer/reset": {
+            "post": {
+                "description": "Marks the current timer session as completed and returns to idle state",
+                "consumes": [
+                    "application/x-www-form-urlencoded"
+                ],
+                "produces": [
+                    "text/html"
+                ],
+                "tags": [
+                    "timer"
+                ],
+                "summary": "Reset and complete a timer session",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Tag name for the timer session",
+                        "name": "tag",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "HTML component for idle timer",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/internal_server.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_server.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/timer/start": {
+            "post": {
+                "description": "Starts a new timer session or resumes an existing stopped session for the specified tag",
+                "consumes": [
+                    "application/x-www-form-urlencoded"
+                ],
+                "produces": [
+                    "text/html"
+                ],
+                "tags": [
+                    "timer"
+                ],
+                "summary": "Start a timer session",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Tag name for the timer session",
+                        "name": "tag",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "HTML component for running timer",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/internal_server.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_server.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/timer/stop": {
+            "post": {
+                "description": "Stops the currently running timer session and updates the elapsed time",
+                "consumes": [
+                    "application/x-www-form-urlencoded"
+                ],
+                "produces": [
+                    "text/html"
+                ],
+                "tags": [
+                    "timer"
+                ],
+                "summary": "Stop a running timer",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Tag name for the timer session",
+                        "name": "tag",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "HTML component for stopped timer",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/internal_server.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_server.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/{provider}": {
+            "get": {
+                "description": "Begins the OAuth authentication flow with the specified provider",
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Initiate OAuth authentication",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "OAuth provider (e.g., google, github)",
+                        "name": "provider",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "307": {
+                        "description": "Redirect to OAuth provider",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/{provider}/callback": {
+            "get": {
+                "description": "Handles the OAuth callback from the provider and creates/updates user session",
+                "tags": [
+                    "auth"
+                ],
+                "summary": "OAuth callback handler",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "OAuth provider (e.g., google, github)",
+                        "name": "provider",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "307": {
+                        "description": "Redirect to home page",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/health": {
+            "get": {
+                "description": "Returns the health status of the API and database",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "health"
+                ],
+                "summary": "Health check endpoint",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_server.HealthResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/logout/{provider}": {
+            "get": {
+                "description": "Clears user session and logs out from OAuth provider",
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Logout user",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "OAuth provider (e.g., google, github)",
+                        "name": "provider",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "307": {
+                        "description": "Redirect to home page",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "internal_server.ErrorResponse": {
+            "description": "Error response returned when an API request fails",
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "example": "unauthorized"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "User not authenticated"
+                }
+            }
+        },
+        "internal_server.HealthResponse": {
+            "description": "Health check response with database status",
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "It's healthy"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "up"
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "CookieAuth": {
+            "type": "apiKey",
+            "name": "session",
+            "in": "cookie"
+        }
+    }
+}

@@ -70,3 +70,14 @@ func (s *service) FindAllUserTagStats(ctx context.Context, userId string) ([]*mo
 	}
 	return tagStats, nil
 }
+
+func (s *service) DeleteUserTagStats(ctx context.Context, userId, tag string) error {
+	collection := s.getUserTagStatsCollection()
+
+	filter := bson.M{"user_id": userId, "tag": tag}
+
+	if _, err := collection.DeleteOne(ctx, filter); err != nil {
+		return err
+	}
+	return nil
+}

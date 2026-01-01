@@ -15,12 +15,12 @@ func formatDuration(seconds int64) string {
 }
 
 templ TimerIdle(tags []string) {
-	<div style="text-align: center; padding: 40px;">
-		<div style="font-size: 48px; font-weight: bold; margin-bottom: 20px;">00:00:00</div>
-		<p style="color: #666; margin-bottom: 30px;">No active timer</p>
-		<form hx-post="/timer/start" hx-target="#timer-container" hx-swap="innerHTML" style="display: flex; gap: 10px; justify-content: center; align-items: flex-start;">
+	<div>
+		<div class="timer-display">00:00:00</div>
+		<p class="idle-message">Ready to be productive? Select a tag and start tracking!</p>
+		<form hx-post="/api/v1/timer/start" hx-target="#timer-container" hx-swap="innerHTML" class="timer-form">
 			@SelectTag(tags)
-			<button type="submit" style="padding: 8px 16px; font-size: 14px; cursor: pointer; background-color: #2563eb; color: white; border: none; border-radius: 4px;">Start Timer</button>
+			<button type="submit" class="btn btn-primary">▶ Start Timer</button>
 		</form>
 	</div>
 }
@@ -30,26 +30,27 @@ templ TimerRunning(session *models.TimerSession, elapsed int64) {
 		x-data={ fmt.Sprintf(`{ elapsed: %d, interval: null }`, elapsed) }
 		x-init="interval = setInterval(() => { elapsed++ }, 1000)"
 		@destroy="clearInterval(interval)"
-		style="text-align: center; padding: 40px;"
 	>
 		<div
-			style="font-size: 64px; font-weight: bold; margin-bottom: 20px; color: #2563eb;"
+			class="timer-display running"
 			x-text="Math.floor(elapsed / 3600).toString().padStart(2, '0') + ':' + Math.floor((elapsed % 3600) / 60).toString().padStart(2, '0') + ':' + (elapsed % 60).toString().padStart(2, '0')"
 		></div>
-		<p style="font-size: 24px; margin-bottom: 30px;">Tag: <strong>{ session.Tag }</strong></p>
-		<div style="display: flex; gap: 10px; justify-content: center;">
-			<button hx-post="/timer/stop" hx-vals={ fmt.Sprintf("{\"tag\": \"%s\"}", session.Tag) } hx-target="#timer-container" hx-swap="innerHTML" style="padding: 12px 24px; font-size: 16px; cursor: pointer; background-color: #dc2626; color: white; border: none; border-radius: 4px;">Stop Timer</button>
+		<p class="timer-tag">Working on: <strong>{ session.Tag }</strong></p>
+		<p class="timer-status">Timer is running...</p>
+		<div class="btn-group">
+			<button hx-post="/api/v1/timer/stop" hx-vals={ fmt.Sprintf("{\"tag\": \"%s\"}", session.Tag) } hx-target="#timer-container" hx-swap="innerHTML" class="btn btn-danger">⏹ Stop Timer</button>
 		</div>
 	</div>
 }
 
 templ TimerStopped(session *models.TimerSession, elapsed int64) {
-	<div style="text-align: center; padding: 40px;">
-		<div style="font-size: 64px; font-weight: bold; margin-bottom: 20px; color: #2563eb;">{ formatDuration(elapsed) }</div>
-		<p style="font-size: 24px; margin-bottom: 30px;">Tag: <strong>{ session.Tag }</strong></p>
-		<div style="display: flex; gap: 10px; justify-content: center;">
-			<button hx-post="/timer/start" hx-vals={ fmt.Sprintf("{\"tag\": \"%s\"}", session.Tag) } hx-target="#timer-container" hx-swap="innerHTML" style="padding: 12px 24px; font-size: 16px; cursor: pointer; background-color: #16a34a; color: white; border: none; border-radius: 4px;">Start Timer</button>
-			<button hx-post="/timer/reset" hx-vals={ fmt.Sprintf("{\"tag\": \"%s\"}", session.Tag) } hx-target="#timer-container" hx-swap="innerHTML" hx-confirm="Are you sure? Your session will be saved." style="padding: 12px 24px; font-size: 16px; cursor: pointer; background-color: #64748b; color: white; border: none; border-radius: 4px;">Reset Timer</button>
+	<div>
+		<div class="timer-display">{ formatDuration(elapsed) }</div>
+		<p class="timer-tag">Completed: <strong>{ session.Tag }</strong></p>
+		<p class="timer-status">Session complete! Start again or save and reset.</p>
+		<div class="btn-group">
+			<button hx-post="/api/v1/timer/start" hx-vals={ fmt.Sprintf("{\"tag\": \"%s\"}", session.Tag) } hx-target="#timer-container" hx-swap="innerHTML" class="btn btn-primary">▶ Continue</button>
+			<button hx-post="/api/v1/timer/reset" hx-vals={ fmt.Sprintf("{\"tag\": \"%s\"}", session.Tag) } hx-target="#timer-container" hx-swap="innerHTML" hx-confirm="Are you sure? Your session will be saved." class="btn btn-secondary">↺ Save &amp; Reset</button>
 		</div>
 	</div>
 }

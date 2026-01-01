@@ -1,4 +1,4 @@
-.PHONY: build run watch clean
+.PHONY: build run watch clean swagger swagger-install test lint docker-build docker-run
 
 # Variables
 BINARY_NAME := productivity-timer
@@ -8,7 +8,7 @@ BIN_DIR := ./bin
 BIN_PATH := $(BIN_DIR)/$(BINARY_NAME)
 
 ## build: Builds the Go application binary.
-build:
+build: swagger
 	mkdir -p $(BIN_DIR)
 	go build -o $(BIN_PATH) $(MAIN_PACKAGE)
 
@@ -24,7 +24,41 @@ watch:
 ## clean: Removes the built binary and other temporary files.
 clean:
 	rm -f $(BIN_PATH)
+	rm -rf docs/
+	rm -f coverage.out
 	# Add other cleanup commands here
+
+## swagger-install: Install swag CLI tool for generating Swagger docs.
+swagger-install:
+	go install github.com/swaggo/swag/cmd/swag@latest
+
+## swagger: Generate Swagger documentation.
+swagger:
+	swag init -g cmd/api/main.go -o docs --parseDependency --parseInternal
+
+## test: Run all tests with coverage.
+test:
+	go test -v -race -coverprofile=coverage.out -covermode=atomic ./...
+
+## test-short: Run tests without race detection (faster).
+test-short:
+	go test -v ./...
+
+## lint: Run golangci-lint.
+lint:
+	golangci-lint run --timeout=5m
+
+## lint-install: Install golangci-lint.
+lint-install:
+	go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+
+## docker-build: Build the Docker image.
+docker-build:
+	docker build -t $(BINARY_NAME):latest .
+
+## docker-run: Run the Docker container.
+docker-run:
+	docker run -p $(SERVICE_PORT):$(SERVICE_PORT) --env-file .env $(BINARY_NAME):latest
 
 ## help: Show this help message.
 help:

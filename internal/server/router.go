@@ -7,6 +7,10 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/neilsmahajan/productivity-timer/web/templates"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+
+	_ "github.com/neilsmahajan/productivity-timer/docs"
 )
 
 func (s *Server) RegisterRoutes() http.Handler {
@@ -19,25 +23,44 @@ func (s *Server) RegisterRoutes() http.Handler {
 		AllowCredentials: true, // Enable cookies/auth
 	}))
 
+	// Static files
 	r.StaticFile("/favicon.ico", "./favicon.ico")
 
-	r.GET("/", s.indexHandler)
+	// Swagger documentation
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
+	// Page routes (HTML responses)
+	r.GET("/", s.indexHandler)
+	r.GET("/stats", s.statsPageHandler)
+
+	// Health check
 	r.GET("/health", s.healthHandler)
 
+	// Auth routes (at root level for OAuth compatibility)
+	// These are browser redirect flows, not REST API endpoints
+	r.GET("/auth/:provider", s.authHandler)
 	r.GET("/auth/:provider/callback", s.callbackHandler)
-
 	r.GET("/logout/:provider", s.logoutHandler)
 
-	r.GET("/auth/:provider", s.authHandler)
+	// API v1 routes
+	v1 := r.Group("/api/v1")
+	{
+		// Timer routes
+		timer := v1.Group("/timer")
+		{
+			timer.POST("/start", s.startTimerHandler)
+			timer.POST("/stop", s.stopTimerHandler)
+			timer.POST("/reset", s.resetTimerHandler)
+		}
 
-	r.POST("/timer/start", s.startTimerHandler)
-
-	r.POST("/timer/stop", s.stopTimerHandler)
-
-	r.POST("/timer/reset", s.resetTimerHandler)
-
-	r.GET("/stats", s.statsPageHandler)
+		// Stats routes
+		stats := v1.Group("/stats")
+		{
+			stats.GET("/summary", s.statsSummaryHandler)
+			stats.GET("/tag/:tag/sessions", s.tagSessionsHandler)
+			stats.DELETE("/tag/:tag", s.deleteTagHandler)
+		}
+	}
 
 	return r
 }
@@ -79,7 +102,7 @@ func (s *Server) indexHandler(c *gin.Context) {
 	if err != nil {
 		log.Printf("Error getting user tag stats: %v", err)
 	}
-	var tags []string
+	tags := make([]string, 0, len(userTagStats))
 	for _, tagStats := range userTagStats {
 		tags = append(tags, tagStats.Tag)
 	}
@@ -91,6 +114,19 @@ func (s *Server) indexHandler(c *gin.Context) {
 	}
 }
 
+// healthHandler godoc
+// @Summary Health check endpoint
+// @Description Returns the health status of the API and database
+// @Tags health
+// @Produce json
+// @Success 200 {object} HealthResponse
+// @Failure 503 {object} HealthResponse
+// @Router /health [get]
 func (s *Server) healthHandler(c *gin.Context) {
-	c.JSON(http.StatusOK, s.db.Health())
+	health := s.db.Health()
+	if health["status"] == "unhealthy" {
+		c.JSON(http.StatusServiceUnavailable, health)
+		return
+	}
+	c.JSON(http.StatusOK, health)
 }

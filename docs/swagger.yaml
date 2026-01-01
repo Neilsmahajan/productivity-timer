@@ -1,0 +1,305 @@
+basePath: /api/v1
+definitions:
+  internal_server.ErrorResponse:
+    description: Error response returned when an API request fails
+    properties:
+      error:
+        example: unauthorized
+        type: string
+      message:
+        example: User not authenticated
+        type: string
+    type: object
+  internal_server.HealthResponse:
+    description: Health check response with database status
+    properties:
+      message:
+        example: It's healthy
+        type: string
+      status:
+        example: up
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    name: API Support
+    url: https://github.com/neilsmahajan/productivity-timer
+  description: |-
+    A productivity timer application for tracking time spent on various tasks with tags.
+    Users can start/stop/reset timers and view statistics of their productivity sessions.
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  title: Productivity Timer API
+  version: "1.0"
+paths:
+  /api/v1/stats/summary:
+    get:
+      description:
+        Returns aggregated statistics for the authenticated user within
+        a date range
+      parameters:
+        - description: "Start datetime (format: 2006-01-02T15:04)"
+          in: query
+          name: start
+          type: string
+        - description: "End datetime (format: 2006-01-02T15:04)"
+          in: query
+          name: end
+          type: string
+      produces:
+        - text/html
+      responses:
+        "200":
+          description: HTML component with stats summary
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: "#/definitions/internal_server.ErrorResponse"
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: "#/definitions/internal_server.ErrorResponse"
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: "#/definitions/internal_server.ErrorResponse"
+      summary: Get stats summary
+      tags:
+        - stats
+  /api/v1/stats/tag/{tag}/sessions:
+    get:
+      description: Returns all timer sessions for a specific tag within a date range
+      parameters:
+        - description: Tag name
+          in: path
+          name: tag
+          required: true
+          type: string
+        - description: "Start datetime (format: 2006-01-02T15:04)"
+          in: query
+          name: start
+          type: string
+        - description: "End datetime (format: 2006-01-02T15:04)"
+          in: query
+          name: end
+          type: string
+      produces:
+        - text/html
+      responses:
+        "200":
+          description: HTML component with tag sessions
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: "#/definitions/internal_server.ErrorResponse"
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: "#/definitions/internal_server.ErrorResponse"
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: "#/definitions/internal_server.ErrorResponse"
+      summary: Get sessions for a specific tag
+      tags:
+        - stats
+  /api/v1/stats/tag/{tag}:
+    delete:
+      description: Deletes all timer sessions and statistics for a specific tag
+      parameters:
+        - description: Tag name to delete
+          in: path
+          name: tag
+          required: true
+          type: string
+      responses:
+        "200":
+          description: Empty response on successful deletion
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: "#/definitions/internal_server.ErrorResponse"
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: "#/definitions/internal_server.ErrorResponse"
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: "#/definitions/internal_server.ErrorResponse"
+      summary: Delete a tag and all its sessions
+      tags:
+        - stats
+  /api/v1/timer/reset:
+    post:
+      consumes:
+        - application/x-www-form-urlencoded
+      description:
+        Marks the current timer session as completed and returns to idle
+        state
+      parameters:
+        - description: Tag name for the timer session
+          in: formData
+          name: tag
+          required: true
+          type: string
+      produces:
+        - text/html
+      responses:
+        "200":
+          description: HTML component for idle timer
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: "#/definitions/internal_server.ErrorResponse"
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: "#/definitions/internal_server.ErrorResponse"
+      summary: Reset and complete a timer session
+      tags:
+        - timer
+  /api/v1/timer/start:
+    post:
+      consumes:
+        - application/x-www-form-urlencoded
+      description:
+        Starts a new timer session or resumes an existing stopped session
+        for the specified tag
+      parameters:
+        - description: Tag name for the timer session
+          in: formData
+          name: tag
+          required: true
+          type: string
+      produces:
+        - text/html
+      responses:
+        "200":
+          description: HTML component for running timer
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: "#/definitions/internal_server.ErrorResponse"
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: "#/definitions/internal_server.ErrorResponse"
+      summary: Start a timer session
+      tags:
+        - timer
+  /api/v1/timer/stop:
+    post:
+      consumes:
+        - application/x-www-form-urlencoded
+      description:
+        Stops the currently running timer session and updates the elapsed
+        time
+      parameters:
+        - description: Tag name for the timer session
+          in: formData
+          name: tag
+          required: true
+          type: string
+      produces:
+        - text/html
+      responses:
+        "200":
+          description: HTML component for stopped timer
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: "#/definitions/internal_server.ErrorResponse"
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: "#/definitions/internal_server.ErrorResponse"
+      summary: Stop a running timer
+      tags:
+        - timer
+  /auth/{provider}:
+    get:
+      description: Begins the OAuth authentication flow with the specified provider
+      parameters:
+        - description: OAuth provider (e.g., google, github)
+          in: path
+          name: provider
+          required: true
+          type: string
+      responses:
+        "307":
+          description: Redirect to OAuth provider
+          schema:
+            type: string
+      summary: Initiate OAuth authentication
+      tags:
+        - auth
+  /auth/{provider}/callback:
+    get:
+      description:
+        Handles the OAuth callback from the provider and creates/updates
+        user session
+      parameters:
+        - description: OAuth provider (e.g., google, github)
+          in: path
+          name: provider
+          required: true
+          type: string
+      responses:
+        "307":
+          description: Redirect to home page
+          schema:
+            type: string
+      summary: OAuth callback handler
+      tags:
+        - auth
+  /health:
+    get:
+      description: Returns the health status of the API and database
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: "#/definitions/internal_server.HealthResponse"
+      summary: Health check endpoint
+      tags:
+        - health
+  /logout/{provider}:
+    get:
+      description: Clears user session and logs out from OAuth provider
+      parameters:
+        - description: OAuth provider (e.g., google, github)
+          in: path
+          name: provider
+          required: true
+          type: string
+      responses:
+        "307":
+          description: Redirect to home page
+          schema:
+            type: string
+      summary: Logout user
+      tags:
+        - auth
+securityDefinitions:
+  CookieAuth:
+    in: cookie
+    name: session
+    type: apiKey
+swagger: "2.0"

@@ -13,6 +13,24 @@ import (
 	"github.com/neilsmahajan/productivity-timer/internal/server"
 )
 
+// @title Productivity Timer API
+// @version 1.0
+// @description A productivity timer application for tracking time spent on various tasks with tags.
+// @description Users can start/stop/reset timers and view statistics of their productivity sessions.
+
+// @contact.name Neil Mahajan
+// @contact.url https://github.com/neilsmahajan/productivity-timer
+
+// @license.name MIT
+// @license.url https://opensource.org/licenses/MIT
+
+// @host localhost:8080
+// @BasePath /api/v1
+
+// @securityDefinitions.apikey CookieAuth
+// @in cookie
+// @name session
+
 func gracefulShutdown(apiServer *http.Server, done chan bool) {
 	// Create context that listens for the interrupt signal from the OS.
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)

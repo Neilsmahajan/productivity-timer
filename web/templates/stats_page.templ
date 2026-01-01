@@ -1,14 +1,279 @@
 package templates
 
-import "github.com/neilsmahajan/productivity-timer/internal/models"
+import (
+	"fmt"
+	"github.com/neilsmahajan/productivity-timer/internal/models"
+)
 
-templ StatsPage(userTagStats []*models.UserTagStats) {
-	<html>
+templ StatsPage() {
+	<!DOCTYPE html>
+	<html lang="en">
 		<head>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 			<title>Productivity Timer Stats</title>
 			<script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.8/dist/htmx.min.js" integrity="sha384-/TgkGk7p307TH7EXJDuUlgG3Ce1UVolAOFopFekQkkXihi5u/6OCvVKyz1W+idaz" crossorigin="anonymous"></script>
 			<script src="//unpkg.com/alpinejs" defer></script>
+			<style>
+				* { box-sizing: border-box; margin: 0; padding: 0; }
+				body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; padding: 20px; }
+				.container { max-width: 900px; margin: 0 auto; }
+				h1 { color: #333; margin-bottom: 20px; }
+				.card { background: white; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+				.period-selector { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+				.period-btn { padding: 8px 16px; border: 1px solid #ddd; background: white; border-radius: 4px; cursor: pointer; transition: all 0.2s; }
+				.period-btn:hover, .period-btn.active { background: #4CAF50; color: white; border-color: #4CAF50; }
+				.custom-range { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 10px; }
+				.custom-range label { font-size: 14px; color: #666; }
+				.custom-range input { padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
+				.submit-btn { padding: 8px 16px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; }
+				.submit-btn:hover { background: #45a049; }
+				.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+				.stat-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 8px; text-align: center; }
+				.stat-value { font-size: 28px; font-weight: bold; }
+				.stat-label { font-size: 14px; opacity: 0.9; margin-top: 5px; }
+				.tag-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+				.tag-table th, .tag-table td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
+				.tag-table th { background: #f8f9fa; font-weight: 600; color: #555; }
+				.tag-table tr:hover { background: #f8f9fa; }
+				.progress-bar { background: #e0e0e0; border-radius: 10px; height: 8px; overflow: hidden; }
+				.progress-fill { background: linear-gradient(90deg, #4CAF50, #8BC34A); height: 100%; border-radius: 10px; }
+				.empty-state { text-align: center; padding: 40px; color: #666; }
+				.back-link { display: inline-block; margin-bottom: 20px; color: #4CAF50; text-decoration: none; }
+				.back-link:hover { text-decoration: underline; }
+				#stats-content { min-height: 200px; }
+				.htmx-indicator { display: none; }
+				.htmx-request .htmx-indicator { display: block; }
+				.htmx-request.htmx-indicator { display: block; }
+				.loading { text-align: center; padding: 40px; color: #666; }
+				.tag-row { cursor: pointer; }
+				.tag-row:hover { background: #e8f5e9 !important; }
+				.tag-name { color: #4CAF50; display: flex; align-items: center; gap: 8px; }
+				.tag-name .arrow { transition: transform 0.2s; font-size: 12px; }
+				.tag-name .arrow.expanded { transform: rotate(90deg); }
+				.sessions-container { background: #fafafa; }
+				.sessions-row td { padding: 0 !important; border-bottom: none !important; }
+				.delete-btn { background: #ff4444; color: white; border: none; border-radius: 4px; padding: 4px 8px; cursor: pointer; font-size: 12px; transition: background 0.2s; }
+				.delete-btn:hover { background: #cc0000; }
+				.actions-cell { text-align: center; }
+				.sessions-content { padding: 15px 20px; }
+				.session-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; background: white; border-radius: 6px; margin-bottom: 8px; border-left: 3px solid #4CAF50; }
+				.session-item:last-child { margin-bottom: 0; }
+				.session-time { color: #666; font-size: 13px; }
+				.session-duration { font-weight: 600; color: #333; }
+				.no-sessions { color: #999; font-style: italic; padding: 10px; }
+				[x-cloak] { display: none !important; }
+			</style>
 		</head>
-		<body></body>
+		<body>
+			<div class="container">
+				<a href="/" class="back-link">← Back to Timer</a>
+				<h1>📊 Your Productivity Stats</h1>
+				<div class="card" x-data="statsController()" x-init="init()">
+					<div class="period-selector">
+						<button type="button" class="period-btn" :class="{ 'active': period === 'today' }" @click="setPeriod('today')">Today</button>
+						<button type="button" class="period-btn" :class="{ 'active': period === 'week' }" @click="setPeriod('week')">This Week</button>
+						<button type="button" class="period-btn" :class="{ 'active': period === 'month' }" @click="setPeriod('month')">This Month</button>
+						<button type="button" class="period-btn" :class="{ 'active': period === 'all' }" @click="setPeriod('all')">All Time</button>
+						<button type="button" class="period-btn" :class="{ 'active': period === 'custom' }" @click="period = 'custom'">Custom</button>
+					</div>
+					<div class="custom-range" x-show="period === 'custom'" x-transition>
+						<label for="startDatetime">From:</label>
+						<input type="datetime-local" id="startDatetime" x-model="startDate"/>
+						<label for="endDatetime">To:</label>
+						<input type="datetime-local" id="endDatetime" x-model="endDate"/>
+						<button type="button" class="submit-btn" @click="fetchCustomStats()">Apply</button>
+					</div>
+					<!-- Hidden inputs for HTMX to include in requests -->
+					<input type="hidden" name="start" id="hiddenStart" :value="startDate"/>
+					<input type="hidden" name="end" id="hiddenEnd" :value="endDate"/>
+				</div>
+				<div id="stats-content" hx-get="/api/v1/stats/summary" hx-trigger="load" hx-swap="innerHTML">
+					<div class="loading">Loading stats...</div>
+				</div>
+			</div>
+			<script>
+				function statsController() {
+					return {
+						period: 'today',
+						startDate: '',
+						endDate: '',
+						
+						init() {
+							// Set default dates for custom range
+							const now = new Date();
+							const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+							this.endDate = this.formatDateForInput(now);
+							this.startDate = this.formatDateForInput(startOfDay);
+						},
+						
+						formatDateForInput(date) {
+							return date.toISOString().slice(0, 16);
+						},
+						
+						setPeriod(p) {
+							this.period = p;
+							const now = new Date();
+							let start, end;
+							
+							switch(p) {
+								case 'today':
+									start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+									end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
+									break;
+								case 'week':
+									const dayOfWeek = now.getDay();
+									start = new Date(now);
+									start.setDate(now.getDate() - dayOfWeek);
+									start.setHours(0, 0, 0, 0);
+									end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
+									break;
+								case 'month':
+									start = new Date(now.getFullYear(), now.getMonth(), 1);
+									end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
+									break;
+								case 'all':
+									start = new Date(2020, 0, 1);
+									end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
+									break;
+							}
+							
+							this.startDate = this.formatDateForInput(start);
+							this.endDate = this.formatDateForInput(end);
+							this.fetchStats();
+						},
+						
+						fetchCustomStats() {
+							if (this.startDate && this.endDate) {
+								this.fetchStats();
+							}
+						},
+						
+						fetchStats() {
+							const url = `/api/v1/stats/summary?start=${encodeURIComponent(this.startDate)}&end=${encodeURIComponent(this.endDate)}`;
+							htmx.ajax('GET', url, {target: '#stats-content', swap: 'innerHTML'});
+						}
+					}
+				}
+			</script>
+		</body>
 	</html>
+}
+
+templ StatsSummary(summary *models.StatsSummary) {
+	if summary == nil || len(summary.TagBreakdown) == 0 {
+		<div class="card empty-state">
+			<p>📭 No stats found for this time period.</p>
+			<p style="margin-top: 10px; font-size: 14px;">Start a timer session to see your productivity stats!</p>
+		</div>
+	} else {
+		<!-- Summary Cards -->
+		<div class="card">
+			<div class="stats-grid">
+				<div class="stat-card">
+					<div class="stat-value">{ formatDuration(summary.TotalDuration) }</div>
+					<div class="stat-label">Total Time</div>
+				</div>
+				<div class="stat-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+					<div class="stat-value">{ fmt.Sprintf("%d", summary.TotalSessions) }</div>
+					<div class="stat-label">Sessions</div>
+				</div>
+				<div class="stat-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+					<div class="stat-value">{ formatDuration(summary.AverageSession) }</div>
+					<div class="stat-label">Avg Session</div>
+				</div>
+				<div class="stat-card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+					<div class="stat-value">{ summary.MostUsedTag }</div>
+					<div class="stat-label">Most Used Tag</div>
+				</div>
+			</div>
+		</div>
+		<!-- Tag Breakdown Table -->
+		<div class="card">
+			<h3 style="margin-bottom: 15px; color: #333;">📋 Tag Breakdown</h3>
+			<p style="margin-bottom: 15px; color: #666; font-size: 14px;">Click on a tag to view individual sessions</p>
+			<table class="tag-table">
+				<thead>
+					<tr>
+						<th>Tag</th>
+						<th>Duration</th>
+						<th>Sessions</th>
+						<th>Avg Session</th>
+						<th>% of Total</th>
+						<th style="width: 150px;">Progress</th>
+						<th style="width: 80px;">Actions</th>
+					</tr>
+				</thead>
+				for _, tag := range summary.TagBreakdown {
+					<tbody x-data="{ expanded: false }">
+						<tr
+							class="tag-row"
+							hx-get={ fmt.Sprintf("/api/v1/stats/tag/%s/sessions", tag.Tag) }
+							hx-target={ fmt.Sprintf("#sessions-%s", tag.Tag) }
+							hx-swap="innerHTML"
+							hx-trigger="click once"
+							hx-include="#hiddenStart, #hiddenEnd"
+							@click="expanded = !expanded"
+						>
+							<td>
+								<span class="tag-name">
+									<span class="arrow" :class="{ 'expanded': expanded }">▶</span>
+									<strong>{ tag.Tag }</strong>
+								</span>
+							</td>
+							<td>{ formatDuration(tag.TotalDuration) }</td>
+							<td>{ fmt.Sprintf("%d", tag.SessionCount) }</td>
+							<td>{ formatDuration(tag.AverageSession) }</td>
+							<td>{ fmt.Sprintf("%.1f%%", tag.PercentageOfTotal) }</td>
+							<td>
+								<div class="progress-bar">
+									<div class="progress-fill" style={ fmt.Sprintf("width: %.1f%%", tag.PercentageOfTotal) }></div>
+								</div>
+							</td>
+							<td class="actions-cell">
+								<button
+									type="button"
+									class="delete-btn"
+									hx-delete={ fmt.Sprintf("/api/v1/stats/tag/%s", tag.Tag) }
+									hx-target="closest tbody"
+									hx-swap="outerHTML"
+									hx-confirm={ fmt.Sprintf("Are you sure you want to delete the tag '%s' and all its sessions?", tag.Tag) }
+									@click.stop
+								>
+									🗑️ Delete
+								</button>
+							</td>
+						</tr>
+						<tr class="sessions-container" x-show="expanded" x-transition x-cloak>
+							<td colspan="7" class="sessions-row">
+								<div id={ fmt.Sprintf("sessions-%s", tag.Tag) } class="sessions-content">
+									<div class="loading">Loading sessions...</div>
+								</div>
+							</td>
+						</tr>
+					</tbody>
+				}
+			</table>
+		</div>
+	}
+}
+
+templ TagSessions(tag string, sessions []*models.TimerSession) {
+	if len(sessions) == 0 {
+		<div class="no-sessions">No sessions found for this time period.</div>
+	} else {
+		<div style="font-size: 14px; color: #666; margin-bottom: 10px;">
+			{ fmt.Sprintf("%d session(s) for tag \"%s\"", len(sessions), tag) }
+		</div>
+		for _, session := range sessions {
+			<div class="session-item">
+				<div class="session-time">
+					{ session.StartTime.Format("Jan 2, 2006 3:04 PM") }
+				</div>
+				<div class="session-duration">
+					{ formatDuration(session.Duration) }
+				</div>
+			</div>
+		}
+	}
 }

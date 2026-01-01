@@ -11,10 +11,27 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
+// startTimerHandler godoc
+// @Summary Start a timer session
+// @Description Starts a new timer session or resumes an existing stopped session for the specified tag
+// @Tags timer
+// @Accept x-www-form-urlencoded
+// @Produce html
+// @Param tag formData string true "Tag name for the timer session"
+// @Success 200 {string} string "HTML component for running timer"
+// @Failure 401 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Router /api/v1/timer/start [post]
 func (s *Server) startTimerHandler(c *gin.Context) {
 	gothUser, tag, err := s.getGothUserAndTag(c)
 	if err != nil || gothUser == nil || tag == "" {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{})
+		return
+	}
+
+	// Abandon any orphaned running timers for this user+tag (e.g., from closed tabs)
+	if err = s.db.AbandonRunningTimers(c.Request.Context(), gothUser.UserID, tag); err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{})
 		return
 	}
 
@@ -67,6 +84,17 @@ func (s *Server) startTimerHandler(c *gin.Context) {
 	}
 }
 
+// stopTimerHandler godoc
+// @Summary Stop a running timer
+// @Description Stops the currently running timer session and updates the elapsed time
+// @Tags timer
+// @Accept x-www-form-urlencoded
+// @Produce html
+// @Param tag formData string true "Tag name for the timer session"
+// @Success 200 {string} string "HTML component for stopped timer"
+// @Failure 401 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Router /api/v1/timer/stop [post]
 func (s *Server) stopTimerHandler(c *gin.Context) {
 	gothUser, tag, err := s.getGothUserAndTag(c)
 	if err != nil {
@@ -116,6 +144,17 @@ func (s *Server) stopTimerHandler(c *gin.Context) {
 	}
 }
 
+// resetTimerHandler godoc
+// @Summary Reset and complete a timer session
+// @Description Marks the current timer session as completed and returns to idle state
+// @Tags timer
+// @Accept x-www-form-urlencoded
+// @Produce html
+// @Param tag formData string true "Tag name for the timer session"
+// @Success 200 {string} string "HTML component for idle timer"
+// @Failure 401 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Router /api/v1/timer/reset [post]
 func (s *Server) resetTimerHandler(c *gin.Context) {
 	gothUser, tag, err := s.getGothUserAndTag(c)
 	if err != nil {
@@ -143,7 +182,7 @@ func (s *Server) resetTimerHandler(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{})
 		return
 	}
-	var tags []string
+	tags := make([]string, 0, len(allUserTagStats))
 	for _, tagStats := range allUserTagStats {
 		tags = append(tags, tagStats.Tag)
 	}

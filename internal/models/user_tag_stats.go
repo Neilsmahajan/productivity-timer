@@ -6,6 +6,15 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+type Period string
+
+const (
+	PeriodDaily   Period = "daily"
+	PeriodWeekly  Period = "weekly"
+	PeriodMonthly Period = "monthly"
+	PeriodCustom  Period = "custom"
+)
+
 type UserTagStats struct {
 	ID            primitive.ObjectID `bson:"_id" json:"id"`
 	UserID        string             `bson:"user_id" json:"userId"`

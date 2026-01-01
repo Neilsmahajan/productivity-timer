@@ -6,10 +6,12 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+type TimerStatus string
+
 const (
-	StatusRunning   string = "running"
-	StatusStopped   string = "stopped"
-	StatusCompleted string = "completed"
+	StatusRunning   TimerStatus = "running"
+	StatusStopped   TimerStatus = "stopped"
+	StatusCompleted TimerStatus = "completed"
 )
 
 type TimerSession struct {
@@ -19,7 +21,7 @@ type TimerSession struct {
 	StartTime   time.Time          `bson:"start_time" json:"startTime"`
 	EndTime     *time.Time         `bson:"end_time,omitempty" json:"endTime,omitempty"`
 	Duration    int64              `bson:"duration" json:"duration"` // Duration in seconds
-	Status      string             `bson:"status" json:"status"`     // e.g., "running", "stopped"
+	Status      TimerStatus        `bson:"status" json:"status"`     // e.g., "running", "stopped"
 	CreatedAt   time.Time          `bson:"created_at" json:"createdAt"`
 	LastUpdated time.Time          `bson:"last_updated" json:"lastUpdated"`
 }

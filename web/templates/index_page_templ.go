@@ -5,11 +5,11 @@ package templates
 
 //lint:file-ignore SA4006 This context is only used if a nested component is present.
 
-import "github.com/a-h/templ"
-import templruntime "github.com/a-h/templ/runtime"
-
 import (
 	"fmt"
+
+	"github.com/a-h/templ"
+	templruntime "github.com/a-h/templ/runtime"
 	"github.com/markbates/goth"
 	"github.com/neilsmahajan/productivity-timer/internal/models"
 )
@@ -35,46 +35,46 @@ func IndexPage(user *goth.User, activeSession *models.TimerSession, tags []strin
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<html><head><title>Productivity Timer</title><script src=\"https://cdn.jsdelivr.net/npm/htmx.org@2.0.8/dist/htmx.min.js\" integrity=\"sha384-/TgkGk7p307TH7EXJDuUlgG3Ce1UVolAOFopFekQkkXihi5u/6OCvVKyz1W+idaz\" crossorigin=\"anonymous\"></script><script src=\"//unpkg.com/alpinejs\" defer></script></head><body><div style=\"padding: 20px;\"><div style=\"display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;\"><div><img src=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!doctype html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Productivity Timer</title><script src=\"https://cdn.jsdelivr.net/npm/htmx.org@2.0.8/dist/htmx.min.js\" integrity=\"sha384-/TgkGk7p307TH7EXJDuUlgG3Ce1UVolAOFopFekQkkXihi5u/6OCvVKyz1W+idaz\" crossorigin=\"anonymous\"></script><script src=\"//unpkg.com/alpinejs\" defer></script><style>\n\t\t\t\t* { box-sizing: border-box; margin: 0; padding: 0; }\n\t\t\t\tbody { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; min-height: 100vh; }\n\t\t\t\t.container { max-width: 900px; margin: 0 auto; padding: 20px; }\n\t\t\t\th1 { color: #333; margin-bottom: 20px; }\n\t\t\t\t.card { background: white; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }\n\t\t\t\t.header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }\n\t\t\t\t.user-info { display: flex; align-items: center; gap: 12px; }\n\t\t\t\t.avatar { width: 40px; height: 40px; border-radius: 50%; }\n\t\t\t\t.user-email { color: #333; font-weight: 500; }\n\t\t\t\t.nav-links { display: flex; gap: 15px; align-items: center; }\n\t\t\t\t.nav-link { color: #4CAF50; text-decoration: none; padding: 8px 16px; border-radius: 4px; transition: all 0.2s; }\n\t\t\t\t.nav-link:hover { background: #e8f5e9; }\n\t\t\t\t.logout-link { color: #666; }\n\t\t\t\t.logout-link:hover { color: #dc2626; background: #fee2e2; }\n\t\t\t\t.timer-card { text-align: center; padding: 40px 20px; }\n\t\t\t\t.timer-display { font-size: 72px; font-weight: bold; color: #333; margin-bottom: 10px; font-variant-numeric: tabular-nums; }\n\t\t\t\t.timer-display.running { color: #4CAF50; }\n\t\t\t\t.timer-tag { font-size: 18px; color: #666; margin-bottom: 30px; }\n\t\t\t\t.timer-tag strong { color: #4CAF50; }\n\t\t\t\t.timer-status { font-size: 14px; color: #999; margin-bottom: 20px; }\n\t\t\t\t.btn { padding: 12px 24px; font-size: 16px; cursor: pointer; border: none; border-radius: 6px; font-weight: 500; transition: all 0.2s; }\n\t\t\t\t.btn-primary { background: linear-gradient(135deg, #4CAF50 0%, #8BC34A 100%); color: white; }\n\t\t\t\t.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4); }\n\t\t\t\t.btn-danger { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; }\n\t\t\t\t.btn-danger:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(245, 87, 108, 0.4); }\n\t\t\t\t.btn-secondary { background: #64748b; color: white; }\n\t\t\t\t.btn-secondary:hover { background: #475569; }\n\t\t\t\t.btn-group { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }\n\t\t\t\t.timer-form { display: flex; gap: 12px; justify-content: center; align-items: flex-start; flex-wrap: wrap; }\n\t\t\t\t.tag-select { padding: 12px 16px; font-size: 16px; border: 1px solid #ddd; border-radius: 6px; min-width: 200px; }\n\t\t\t\t.tag-select:focus { outline: none; border-color: #4CAF50; box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1); }\n\t\t\t\t.idle-message { color: #666; margin-bottom: 30px; }\n\t\t\t\t[x-cloak] { display: none !important; }\n\t\t\t</style></head><body><div class=\"container\"><div class=\"card header\"><div class=\"user-info\"><img src=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(user.AvatarURL)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/index_page.templ`, Line: 20, Col: 31}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/index_page.templ`, Line: 58, Col: 31}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" alt=\"avatar\" style=\"width: 40px; height: 40px; border-radius: 50%; vertical-align: middle;\"> <span style=\"margin-left: 10px;\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" alt=\"avatar\" class=\"avatar\"> <span class=\"user-email\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(user.Email)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/index_page.templ`, Line: 21, Col: 51}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/index_page.templ`, Line: 59, Col: 43}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</span></div><a href=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</span></div><div class=\"nav-links\"><a href=\"/stats\" class=\"nav-link\">📊 Stats</a> <a href=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var4 templ.SafeURL
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL(fmt.Sprintf("/logout/%s", user.Provider)))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/index_page.templ`, Line: 23, Col: 66}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/index_page.templ`, Line: 63, Col: 67}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\">logout</a></div><h1>Productivity Timer</h1><div id=\"timer-container\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" class=\"nav-link logout-link\">Logout</a></div></div><h1>⏱️ Productivity Timer</h1><div class=\"card timer-card\" id=\"timer-container\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

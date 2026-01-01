@@ -5,10 +5,12 @@ package templates
 
 //lint:file-ignore SA4006 This context is only used if a nested component is present.
 
-import "github.com/a-h/templ"
-import templruntime "github.com/a-h/templ/runtime"
+import (
+	"fmt"
 
-import "fmt"
+	"github.com/a-h/templ"
+	templruntime "github.com/a-h/templ/runtime"
+)
 
 func SelectTag(tags []string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
@@ -51,7 +53,7 @@ func SelectTag(tags []string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" style=\"position: relative;\"><input type=\"text\" name=\"tag\" x-model=\"search\" @focus=\"open = true\" @blur=\"setTimeout(() => open = false, 150)\" placeholder=\"Select or create a tag...\" required style=\"padding: 8px 12px; width: 200px; font-size: 14px; border: 1px solid #ccc; border-radius: 4px;\"><ul x-show=\"open && filteredItems.length > 0\" style=\"position: absolute; top: 100%; left: 0; width: 200px; max-height: 150px; overflow-y: auto; background: white; border: 1px solid #ccc; border-radius: 4px; margin: 4px 0 0 0; padding: 0; list-style: none; box-shadow: 0 2px 4px rgba(0,0,0,0.1); z-index: 10;\"><template x-for=\"item in filteredItems\" :key=\"item\"><li x-text=\"item\" @mousedown.prevent=\"search = item; open = false\" style=\"padding: 8px 12px; cursor: pointer; font-size: 14px;\" @mouseover=\"$el.style.backgroundColor = '#f3f4f6'\" @mouseout=\"$el.style.backgroundColor = 'white'\"></li></template></ul></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" style=\"position: relative;\"><input type=\"text\" name=\"tag\" x-model=\"search\" @focus=\"open = true\" @blur=\"setTimeout(() => open = false, 150)\" placeholder=\"Select or create a tag...\" required class=\"tag-select\"><ul x-show=\"open && filteredItems.length > 0\" style=\"position: absolute; top: 100%; left: 0; width: 100%; max-height: 150px; overflow-y: auto; background: white; border: 1px solid #ddd; border-radius: 6px; margin: 4px 0 0 0; padding: 0; list-style: none; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 10;\"><template x-for=\"item in filteredItems\" :key=\"item\"><li x-text=\"item\" @mousedown.prevent=\"search = item; open = false\" style=\"padding: 10px 16px; cursor: pointer; font-size: 14px; transition: background 0.15s;\" @mouseover=\"$el.style.backgroundColor = '#e8f5e9'\" @mouseout=\"$el.style.backgroundColor = 'white'\"></li></template></ul></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

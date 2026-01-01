@@ -5,12 +5,15 @@ package templates
 
 //lint:file-ignore SA4006 This context is only used if a nested component is present.
 
-import "github.com/a-h/templ"
-import templruntime "github.com/a-h/templ/runtime"
+import (
+	"fmt"
 
-import "github.com/neilsmahajan/productivity-timer/internal/models"
+	"github.com/a-h/templ"
+	templruntime "github.com/a-h/templ/runtime"
+	"github.com/neilsmahajan/productivity-timer/internal/models"
+)
 
-func StatsPage(userTagStats []*models.UserTagStats) templ.Component {
+func StatsPage() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -31,9 +34,331 @@ func StatsPage(userTagStats []*models.UserTagStats) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<html><head><title>Productivity Timer Stats</title><script src=\"https://cdn.jsdelivr.net/npm/htmx.org@2.0.8/dist/htmx.min.js\" integrity=\"sha384-/TgkGk7p307TH7EXJDuUlgG3Ce1UVolAOFopFekQkkXihi5u/6OCvVKyz1W+idaz\" crossorigin=\"anonymous\"></script><script src=\"//unpkg.com/alpinejs\" defer></script></head><body></body></html>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!doctype html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Productivity Timer Stats</title><script src=\"https://cdn.jsdelivr.net/npm/htmx.org@2.0.8/dist/htmx.min.js\" integrity=\"sha384-/TgkGk7p307TH7EXJDuUlgG3Ce1UVolAOFopFekQkkXihi5u/6OCvVKyz1W+idaz\" crossorigin=\"anonymous\"></script><script src=\"//unpkg.com/alpinejs\" defer></script><style>\n\t\t\t\t* { box-sizing: border-box; margin: 0; padding: 0; }\n\t\t\t\tbody { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; padding: 20px; }\n\t\t\t\t.container { max-width: 900px; margin: 0 auto; }\n\t\t\t\th1 { color: #333; margin-bottom: 20px; }\n\t\t\t\t.card { background: white; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }\n\t\t\t\t.period-selector { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }\n\t\t\t\t.period-btn { padding: 8px 16px; border: 1px solid #ddd; background: white; border-radius: 4px; cursor: pointer; transition: all 0.2s; }\n\t\t\t\t.period-btn:hover, .period-btn.active { background: #4CAF50; color: white; border-color: #4CAF50; }\n\t\t\t\t.custom-range { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 10px; }\n\t\t\t\t.custom-range label { font-size: 14px; color: #666; }\n\t\t\t\t.custom-range input { padding: 8px; border: 1px solid #ddd; border-radius: 4px; }\n\t\t\t\t.submit-btn { padding: 8px 16px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; }\n\t\t\t\t.submit-btn:hover { background: #45a049; }\n\t\t\t\t.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }\n\t\t\t\t.stat-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 8px; text-align: center; }\n\t\t\t\t.stat-value { font-size: 28px; font-weight: bold; }\n\t\t\t\t.stat-label { font-size: 14px; opacity: 0.9; margin-top: 5px; }\n\t\t\t\t.tag-table { width: 100%; border-collapse: collapse; margin-top: 15px; }\n\t\t\t\t.tag-table th, .tag-table td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }\n\t\t\t\t.tag-table th { background: #f8f9fa; font-weight: 600; color: #555; }\n\t\t\t\t.tag-table tr:hover { background: #f8f9fa; }\n\t\t\t\t.progress-bar { background: #e0e0e0; border-radius: 10px; height: 8px; overflow: hidden; }\n\t\t\t\t.progress-fill { background: linear-gradient(90deg, #4CAF50, #8BC34A); height: 100%; border-radius: 10px; }\n\t\t\t\t.empty-state { text-align: center; padding: 40px; color: #666; }\n\t\t\t\t.back-link { display: inline-block; margin-bottom: 20px; color: #4CAF50; text-decoration: none; }\n\t\t\t\t.back-link:hover { text-decoration: underline; }\n\t\t\t\t#stats-content { min-height: 200px; }\n\t\t\t\t.htmx-indicator { display: none; }\n\t\t\t\t.htmx-request .htmx-indicator { display: block; }\n\t\t\t\t.htmx-request.htmx-indicator { display: block; }\n\t\t\t\t.loading { text-align: center; padding: 40px; color: #666; }\n\t\t\t\t.tag-row { cursor: pointer; }\n\t\t\t\t.tag-row:hover { background: #e8f5e9 !important; }\n\t\t\t\t.tag-name { color: #4CAF50; display: flex; align-items: center; gap: 8px; }\n\t\t\t\t.tag-name .arrow { transition: transform 0.2s; font-size: 12px; }\n\t\t\t\t.tag-name .arrow.expanded { transform: rotate(90deg); }\n\t\t\t\t.sessions-container { background: #fafafa; }\n\t\t\t\t.sessions-row td { padding: 0 !important; border-bottom: none !important; }\n\t\t\t\t.delete-btn { background: #ff4444; color: white; border: none; border-radius: 4px; padding: 4px 8px; cursor: pointer; font-size: 12px; transition: background 0.2s; }\n\t\t\t\t.delete-btn:hover { background: #cc0000; }\n\t\t\t\t.actions-cell { text-align: center; }\n\t\t\t\t.sessions-content { padding: 15px 20px; }\n\t\t\t\t.session-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; background: white; border-radius: 6px; margin-bottom: 8px; border-left: 3px solid #4CAF50; }\n\t\t\t\t.session-item:last-child { margin-bottom: 0; }\n\t\t\t\t.session-time { color: #666; font-size: 13px; }\n\t\t\t\t.session-duration { font-weight: 600; color: #333; }\n\t\t\t\t.no-sessions { color: #999; font-style: italic; padding: 10px; }\n\t\t\t\t[x-cloak] { display: none !important; }\n\t\t\t</style></head><body><div class=\"container\"><a href=\"/\" class=\"back-link\">← Back to Timer</a><h1>📊 Your Productivity Stats</h1><div class=\"card\" x-data=\"statsController()\" x-init=\"init()\"><div class=\"period-selector\"><button type=\"button\" class=\"period-btn\" :class=\"{ 'active': period === 'today' }\" @click=\"setPeriod('today')\">Today</button> <button type=\"button\" class=\"period-btn\" :class=\"{ 'active': period === 'week' }\" @click=\"setPeriod('week')\">This Week</button> <button type=\"button\" class=\"period-btn\" :class=\"{ 'active': period === 'month' }\" @click=\"setPeriod('month')\">This Month</button> <button type=\"button\" class=\"period-btn\" :class=\"{ 'active': period === 'all' }\" @click=\"setPeriod('all')\">All Time</button> <button type=\"button\" class=\"period-btn\" :class=\"{ 'active': period === 'custom' }\" @click=\"period = 'custom'\">Custom</button></div><div class=\"custom-range\" x-show=\"period === 'custom'\" x-transition><label for=\"startDatetime\">From:</label> <input type=\"datetime-local\" id=\"startDatetime\" x-model=\"startDate\"> <label for=\"endDatetime\">To:</label> <input type=\"datetime-local\" id=\"endDatetime\" x-model=\"endDate\"> <button type=\"button\" class=\"submit-btn\" @click=\"fetchCustomStats()\">Apply</button></div><!-- Hidden inputs for HTMX to include in requests --><input type=\"hidden\" name=\"start\" id=\"hiddenStart\" :value=\"startDate\"> <input type=\"hidden\" name=\"end\" id=\"hiddenEnd\" :value=\"endDate\"></div><div id=\"stats-content\" hx-get=\"/api/v1/stats/summary\" hx-trigger=\"load\" hx-swap=\"innerHTML\"><div class=\"loading\">Loading stats...</div></div></div><script>\n\t\t\t\tfunction statsController() {\n\t\t\t\t\treturn {\n\t\t\t\t\t\tperiod: 'today',\n\t\t\t\t\t\tstartDate: '',\n\t\t\t\t\t\tendDate: '',\n\t\t\t\t\t\t\n\t\t\t\t\t\tinit() {\n\t\t\t\t\t\t\t// Set default dates for custom range\n\t\t\t\t\t\t\tconst now = new Date();\n\t\t\t\t\t\t\tconst startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());\n\t\t\t\t\t\t\tthis.endDate = this.formatDateForInput(now);\n\t\t\t\t\t\t\tthis.startDate = this.formatDateForInput(startOfDay);\n\t\t\t\t\t\t},\n\t\t\t\t\t\t\n\t\t\t\t\t\tformatDateForInput(date) {\n\t\t\t\t\t\t\treturn date.toISOString().slice(0, 16);\n\t\t\t\t\t\t},\n\t\t\t\t\t\t\n\t\t\t\t\t\tsetPeriod(p) {\n\t\t\t\t\t\t\tthis.period = p;\n\t\t\t\t\t\t\tconst now = new Date();\n\t\t\t\t\t\t\tlet start, end;\n\t\t\t\t\t\t\t\n\t\t\t\t\t\t\tswitch(p) {\n\t\t\t\t\t\t\t\tcase 'today':\n\t\t\t\t\t\t\t\t\tstart = new Date(now.getFullYear(), now.getMonth(), now.getDate());\n\t\t\t\t\t\t\t\t\tend = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);\n\t\t\t\t\t\t\t\t\tbreak;\n\t\t\t\t\t\t\t\tcase 'week':\n\t\t\t\t\t\t\t\t\tconst dayOfWeek = now.getDay();\n\t\t\t\t\t\t\t\t\tstart = new Date(now);\n\t\t\t\t\t\t\t\t\tstart.setDate(now.getDate() - dayOfWeek);\n\t\t\t\t\t\t\t\t\tstart.setHours(0, 0, 0, 0);\n\t\t\t\t\t\t\t\t\tend = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);\n\t\t\t\t\t\t\t\t\tbreak;\n\t\t\t\t\t\t\t\tcase 'month':\n\t\t\t\t\t\t\t\t\tstart = new Date(now.getFullYear(), now.getMonth(), 1);\n\t\t\t\t\t\t\t\t\tend = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);\n\t\t\t\t\t\t\t\t\tbreak;\n\t\t\t\t\t\t\t\tcase 'all':\n\t\t\t\t\t\t\t\t\tstart = new Date(2020, 0, 1);\n\t\t\t\t\t\t\t\t\tend = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);\n\t\t\t\t\t\t\t\t\tbreak;\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t\n\t\t\t\t\t\t\tthis.startDate = this.formatDateForInput(start);\n\t\t\t\t\t\t\tthis.endDate = this.formatDateForInput(end);\n\t\t\t\t\t\t\tthis.fetchStats();\n\t\t\t\t\t\t},\n\t\t\t\t\t\t\n\t\t\t\t\t\tfetchCustomStats() {\n\t\t\t\t\t\t\tif (this.startDate && this.endDate) {\n\t\t\t\t\t\t\t\tthis.fetchStats();\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t},\n\t\t\t\t\t\t\n\t\t\t\t\t\tfetchStats() {\n\t\t\t\t\t\t\tconst url = `/api/v1/stats/summary?start=${encodeURIComponent(this.startDate)}&end=${encodeURIComponent(this.endDate)}`;\n\t\t\t\t\t\t\thtmx.ajax('GET', url, {target: '#stats-content', swap: 'innerHTML'});\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t</script></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}
+
+func StatsSummary(summary *models.StatsSummary) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var2 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var2 == nil {
+			templ_7745c5c3_Var2 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		if summary == nil || len(summary.TagBreakdown) == 0 {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<div class=\"card empty-state\"><p>📭 No stats found for this time period.</p><p style=\"margin-top: 10px; font-size: 14px;\">Start a timer session to see your productivity stats!</p></div>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		} else {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<!-- Summary Cards --> <div class=\"card\"><div class=\"stats-grid\"><div class=\"stat-card\"><div class=\"stat-value\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var3 string
+			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(formatDuration(summary.TotalDuration))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/stats_page.templ`, Line: 174, Col: 68}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</div><div class=\"stat-label\">Total Time</div></div><div class=\"stat-card\" style=\"background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);\"><div class=\"stat-value\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var4 string
+			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", summary.TotalSessions))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/stats_page.templ`, Line: 178, Col: 71}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</div><div class=\"stat-label\">Sessions</div></div><div class=\"stat-card\" style=\"background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);\"><div class=\"stat-value\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var5 string
+			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(formatDuration(summary.AverageSession))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/stats_page.templ`, Line: 182, Col: 69}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</div><div class=\"stat-label\">Avg Session</div></div><div class=\"stat-card\" style=\"background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);\"><div class=\"stat-value\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var6 string
+			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(summary.MostUsedTag)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/stats_page.templ`, Line: 186, Col: 50}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</div><div class=\"stat-label\">Most Used Tag</div></div></div></div><!-- Tag Breakdown Table --> <div class=\"card\"><h3 style=\"margin-bottom: 15px; color: #333;\">📋 Tag Breakdown</h3><p style=\"margin-bottom: 15px; color: #666; font-size: 14px;\">Click on a tag to view individual sessions</p><table class=\"tag-table\"><thead><tr><th>Tag</th><th>Duration</th><th>Sessions</th><th>Avg Session</th><th>% of Total</th><th style=\"width: 150px;\">Progress</th><th style=\"width: 80px;\">Actions</th></tr></thead> ")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			for _, tag := range summary.TagBreakdown {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<tbody x-data=\"{ expanded: false }\"><tr class=\"tag-row\" hx-get=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var7 string
+				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/api/v1/stats/tag/%s/sessions", tag.Tag))
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/stats_page.templ`, Line: 211, Col: 69}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\" hx-target=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var8 string
+				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("#sessions-%s", tag.Tag))
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/stats_page.templ`, Line: 212, Col: 55}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "\" hx-swap=\"innerHTML\" hx-trigger=\"click once\" hx-include=\"#hiddenStart, #hiddenEnd\" @click=\"expanded = !expanded\"><td><span class=\"tag-name\"><span class=\"arrow\" :class=\"{ 'expanded': expanded }\">▶</span> <strong>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var9 string
+				templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(tag.Tag)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/stats_page.templ`, Line: 221, Col: 26}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</strong></span></td><td>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var10 string
+				templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(formatDuration(tag.TotalDuration))
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/stats_page.templ`, Line: 224, Col: 46}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "</td><td>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var11 string
+				templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", tag.SessionCount))
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/stats_page.templ`, Line: 225, Col: 48}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "</td><td>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var12 string
+				templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(formatDuration(tag.AverageSession))
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/stats_page.templ`, Line: 226, Col: 47}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "</td><td>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var13 string
+				templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%.1f%%", tag.PercentageOfTotal))
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/stats_page.templ`, Line: 227, Col: 57}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</td><td><div class=\"progress-bar\"><div class=\"progress-fill\" style=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var14 string
+				templ_7745c5c3_Var14, templ_7745c5c3_Err = templruntime.SanitizeStyleAttributeValues(fmt.Sprintf("width: %.1f%%", tag.PercentageOfTotal))
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/stats_page.templ`, Line: 230, Col: 95}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "\"></div></div></td><td class=\"actions-cell\"><button type=\"button\" class=\"delete-btn\" hx-delete=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var15 string
+				templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/api/v1/stats/tag/%s", tag.Tag))
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/stats_page.templ`, Line: 237, Col: 65}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "\" hx-target=\"closest tbody\" hx-swap=\"outerHTML\" hx-confirm=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var16 string
+				templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("Are you sure you want to delete the tag '%s' and all its sessions?", tag.Tag))
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/stats_page.templ`, Line: 240, Col: 112}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "\" @click.stop>🗑️ Delete</button></td></tr><tr class=\"sessions-container\" x-show=\"expanded\" x-transition x-cloak><td colspan=\"7\" class=\"sessions-row\"><div id=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var17 string
+				templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("sessions-%s", tag.Tag))
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/stats_page.templ`, Line: 249, Col: 53}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "\" class=\"sessions-content\"><div class=\"loading\">Loading sessions...</div></div></td></tr></tbody>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "</table></div>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		return nil
+	})
+}
+
+func TagSessions(tag string, sessions []*models.TimerSession) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var18 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var18 == nil {
+			templ_7745c5c3_Var18 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		if len(sessions) == 0 {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "<div class=\"no-sessions\">No sessions found for this time period.</div>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		} else {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "<div style=\"font-size: 14px; color: #666; margin-bottom: 10px;\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var19 string
+			templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d session(s) for tag \"%s\"", len(sessions), tag))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/stats_page.templ`, Line: 266, Col: 68}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "</div>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			for _, session := range sessions {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "<div class=\"session-item\"><div class=\"session-time\">")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var20 string
+				templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(session.StartTime.Format("Jan 2, 2006 3:04 PM"))
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/stats_page.templ`, Line: 271, Col: 54}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "</div><div class=\"session-duration\">")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var21 string
+				templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(formatDuration(session.Duration))
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/stats_page.templ`, Line: 274, Col: 39}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "</div></div>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
 		}
 		return nil
 	})

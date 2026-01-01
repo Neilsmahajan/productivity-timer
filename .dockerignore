@@ -1,0 +1,41 @@
+# Git
+.git
+.gitignore
+
+# Build artifacts
+bin/
+tmp/
+
+# Documentation (regenerated during build if needed)
+docs/
+
+# Environment files (secrets should be injected at runtime)
+.env
+.env.*
+*.env
+
+# IDE and editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Test files
+*_test.go
+coverage.out
+
+# Docker files (not needed inside container)
+Dockerfile
+docker-compose.yaml
+docker-compose*.yaml
+.dockerignore
+
+# Misc
+README.md
+LICENSE
+Makefile
