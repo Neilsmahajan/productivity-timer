@@ -14,7 +14,7 @@ import (
 	"github.com/neilsmahajan/productivity-timer/internal/models"
 )
 
-func IndexPage(user *goth.User, activeSession *models.TimerSession) templ.Component {
+func IndexPage(user *goth.User, activeSession *models.TimerSession, tags []string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -79,7 +79,7 @@ func IndexPage(user *goth.User, activeSession *models.TimerSession) templ.Compon
 			return templ_7745c5c3_Err
 		}
 		if activeSession == nil {
-			templ_7745c5c3_Err = TimerIdle().Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = TimerIdle(tags).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

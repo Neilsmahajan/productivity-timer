@@ -72,7 +72,13 @@ func (s *Server) indexHandler(c *gin.Context) {
 		return
 	}
 
-	component := templates.IndexPage(gothUser, nil)
+	userTagStats, err := s.db.FindAllUserTagStats(c.Request.Context(), gothUser.UserID)
+	var tags []string
+	for _, tagStats := range userTagStats {
+		tags = append(tags, tagStats.Tag)
+	}
+
+	component := templates.IndexPage(gothUser, nil, tags)
 	if err = component.Render(context.Background(), c.Writer); err != nil {
 		log.Printf("Error rendering user page: %v", err)
 		c.String(http.StatusInternalServerError, "Error rendering page")

@@ -22,7 +22,7 @@ func formatDuration(seconds int64) string {
 	return fmt.Sprintf("%02d:%02d:%02d", hours, minutes, secs)
 }
 
-func TimerIdle() templ.Component {
+func TimerIdle(tags []string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -43,7 +43,15 @@ func TimerIdle() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div style=\"text-align: center; padding: 40px;\"><div style=\"font-size: 48px; font-weight: bold; margin-bottom: 20px;\">00:00:00</div><p style=\"color: #666; margin-bottom: 30px;\">No active timer</p><form hx-post=\"/timer/start\" hx-target=\"#timer-container\" hx-swap=\"innerHTML\" style=\"display: flex; gap: 10px; justify-content: center;\"><input type=\"text\" name=\"tag\" placeholder=\"What are you working on?\" required style=\"padding: 10px; width: 300px; font-size: 16px;\"> <button type=\"submit\" style=\"padding: 10px 20px; font-size: 16px; cursor: pointer;\">Start Timer</button></form></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div style=\"text-align: center; padding: 40px;\"><div style=\"font-size: 48px; font-weight: bold; margin-bottom: 20px;\">00:00:00</div><p style=\"color: #666; margin-bottom: 30px;\">No active timer</p><form hx-post=\"/timer/start\" hx-target=\"#timer-container\" hx-swap=\"innerHTML\" style=\"display: flex; gap: 10px; justify-content: center;\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = SelectTag(tags).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<button type=\"submit\" style=\"padding: 10px 20px; font-size: 16px; cursor: pointer;\">Start Timer</button></form></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -72,7 +80,7 @@ func TimerRunning(session *models.TimerSession, elapsed int64) templ.Component {
 			templ_7745c5c3_Var2 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<div x-data=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<div x-data=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -85,7 +93,7 @@ func TimerRunning(session *models.TimerSession, elapsed int64) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\" x-init=\"interval = setInterval(() => { elapsed++ }, 1000)\" @destroy=\"clearInterval(interval)\" style=\"text-align: center; padding: 40px;\"><div style=\"font-size: 64px; font-weight: bold; margin-bottom: 20px; color: #2563eb;\" x-text=\"Math.floor(elapsed / 3600).toString().padStart(2, '0') + ':' + Math.floor((elapsed % 3600) / 60).toString().padStart(2, '0') + ':' + (elapsed % 60).toString().padStart(2, '0')\"></div><p style=\"font-size: 24px; margin-bottom: 30px;\">Tag: <strong>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" x-init=\"interval = setInterval(() => { elapsed++ }, 1000)\" @destroy=\"clearInterval(interval)\" style=\"text-align: center; padding: 40px;\"><div style=\"font-size: 64px; font-weight: bold; margin-bottom: 20px; color: #2563eb;\" x-text=\"Math.floor(elapsed / 3600).toString().padStart(2, '0') + ':' + Math.floor((elapsed % 3600) / 60).toString().padStart(2, '0') + ':' + (elapsed % 60).toString().padStart(2, '0')\"></div><p style=\"font-size: 24px; margin-bottom: 30px;\">Tag: <strong>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -98,7 +106,7 @@ func TimerRunning(session *models.TimerSession, elapsed int64) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</strong></p><div style=\"display: flex; gap: 10px; justify-content: center;\"><button hx-post=\"/timer/stop\" hx-vals=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</strong></p><div style=\"display: flex; gap: 10px; justify-content: center;\"><button hx-post=\"/timer/stop\" hx-vals=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -111,7 +119,7 @@ func TimerRunning(session *models.TimerSession, elapsed int64) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\" hx-target=\"#timer-container\" hx-swap=\"innerHTML\" style=\"padding: 12px 24px; font-size: 16px; cursor: pointer; background-color: #dc2626; color: white; border: none; border-radius: 4px;\">Stop Timer</button></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "\" hx-target=\"#timer-container\" hx-swap=\"innerHTML\" style=\"padding: 12px 24px; font-size: 16px; cursor: pointer; background-color: #dc2626; color: white; border: none; border-radius: 4px;\">Stop Timer</button></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -140,7 +148,7 @@ func TimerStopped(session *models.TimerSession, elapsed int64) templ.Component {
 			templ_7745c5c3_Var6 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<div style=\"text-align: center; padding: 40px;\"><div style=\"font-size: 64px; font-weight: bold; margin-bottom: 20px; color: #2563eb;\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<div style=\"text-align: center; padding: 40px;\"><div style=\"font-size: 64px; font-weight: bold; margin-bottom: 20px; color: #2563eb;\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -153,7 +161,7 @@ func TimerStopped(session *models.TimerSession, elapsed int64) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</div><p style=\"font-size: 24px; margin-bottom: 30px;\">Tag: <strong>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</div><p style=\"font-size: 24px; margin-bottom: 30px;\">Tag: <strong>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -166,7 +174,7 @@ func TimerStopped(session *models.TimerSession, elapsed int64) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</strong></p><div style=\"display: flex; gap: 10px; justify-content: center;\"><button hx-post=\"/timer/start\" hx-vals=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</strong></p><div style=\"display: flex; gap: 10px; justify-content: center;\"><button hx-post=\"/timer/start\" hx-vals=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -179,7 +187,7 @@ func TimerStopped(session *models.TimerSession, elapsed int64) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\" hx-target=\"#timer-container\" hx-swap=\"innerHTML\" style=\"padding: 12px 24px; font-size: 16px; cursor: pointer; background-color: #16a34a; color: white; border: none; border-radius: 4px;\">Start Timer</button> <button hx-post=\"/timer/reset\" hx-vals=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "\" hx-target=\"#timer-container\" hx-swap=\"innerHTML\" style=\"padding: 12px 24px; font-size: 16px; cursor: pointer; background-color: #16a34a; color: white; border: none; border-radius: 4px;\">Start Timer</button> <button hx-post=\"/timer/reset\" hx-vals=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -192,7 +200,7 @@ func TimerStopped(session *models.TimerSession, elapsed int64) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "\" hx-target=\"#timer-container\" hx-swap=\"innerHTML\" hx-confirm=\"Are you sure? Your session will be saved.\" style=\"padding: 12px 24px; font-size: 16px; cursor: pointer; background-color: #64748b; color: white; border: none; border-radius: 4px;\">Reset Timer</button></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\" hx-target=\"#timer-container\" hx-swap=\"innerHTML\" hx-confirm=\"Are you sure? Your session will be saved.\" style=\"padding: 12px 24px; font-size: 16px; cursor: pointer; background-color: #64748b; color: white; border: none; border-radius: 4px;\">Reset Timer</button></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

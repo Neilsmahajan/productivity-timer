@@ -6,7 +6,7 @@ import (
 	"github.com/neilsmahajan/productivity-timer/internal/models"
 )
 
-templ IndexPage(user *goth.User, activeSession *models.TimerSession) {
+templ IndexPage(user *goth.User, activeSession *models.TimerSession, tags []string) {
 	<html>
 		<head>
 			<title>Productivity Timer</title>
@@ -25,7 +25,7 @@ templ IndexPage(user *goth.User, activeSession *models.TimerSession) {
 				<h1>Productivity Timer</h1>
 				<div id="timer-container">
 					if activeSession == nil {
-						@TimerIdle()
+						@TimerIdle(tags)
 					} else {
 						@TimerRunning(activeSession, 0)
 					}

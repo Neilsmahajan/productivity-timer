@@ -23,6 +23,7 @@ type Service interface {
 	UpdateUserTagStats(ctx context.Context, userTagStats *models.UserTagStats) error
 	CreateUserTagStats(ctx context.Context, userTagStats *models.UserTagStats) error
 	FindUserTagStats(ctx context.Context, userId string, tag string) (*models.UserTagStats, error)
+	FindAllUserTagStats(ctx context.Context, userId string) ([]*models.UserTagStats, error)
 }
 
 type service struct {

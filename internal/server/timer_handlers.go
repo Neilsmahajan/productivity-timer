@@ -139,7 +139,16 @@ func (s *Server) resetTimerHandler(c *gin.Context) {
 		return
 	}
 
-	component := templates.TimerIdle()
+	allUserTagStats, err := s.db.FindAllUserTagStats(context.Background(), gothUser.UserID)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{})
+	}
+	var tags []string
+	for _, tagStats := range allUserTagStats {
+		tags = append(tags, tagStats.Tag)
+	}
+
+	component := templates.TimerIdle(tags)
 	if err = component.Render(context.Background(), c.Writer); err != nil {
 		return
 	}

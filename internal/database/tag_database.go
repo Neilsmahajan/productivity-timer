@@ -3,6 +3,7 @@ package database
 import (
 	"context"
 	"fmt"
+	"log"
 
 	"github.com/neilsmahajan/productivity-timer/internal/models"
 	"go.mongodb.org/mongo-driver/bson"
@@ -46,4 +47,26 @@ func (s *service) FindUserTagStats(ctx context.Context, userId, tag string) (*mo
 	}
 
 	return &existingTagStats, nil
+}
+
+func (s *service) FindAllUserTagStats(ctx context.Context, userId string) ([]*models.UserTagStats, error) {
+	collection := s.getUserTagStatsCollection()
+	filter := bson.M{
+		"user_id": userId,
+	}
+	cursor, err := collection.Find(ctx, filter)
+	if err != nil {
+		return nil, err
+	}
+	defer func(cursor *mongo.Cursor, ctx context.Context) {
+		err = cursor.Close(ctx)
+		if err != nil {
+			log.Println(err)
+		}
+	}(cursor, ctx)
+	var tagStats []*models.UserTagStats
+	if err = cursor.All(ctx, &tagStats); err != nil {
+		return nil, err
+	}
+	return tagStats, nil
 }
