@@ -1,7 +1,6 @@
 package server
 
 import (
-	"context"
 	"errors"
 	"net/http"
 	"time"
@@ -24,7 +23,7 @@ func (s *Server) startTimerHandler(c *gin.Context) {
 	if errors.Is(err, mongo.ErrNoDocuments) {
 		timerSession = models.NewTimerSession(gothUser.UserID, tag)
 
-		if err = s.db.CreateTimerSession(context.Background(), timerSession); err != nil {
+		if err = s.db.CreateTimerSession(c.Request.Context(), timerSession); err != nil {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{})
 			return
 		}
@@ -54,7 +53,7 @@ func (s *Server) startTimerHandler(c *gin.Context) {
 		timerSession.Status = models.StatusRunning
 		timerSession.LastUpdated = currentTime
 
-		if err = s.db.UpdateTimerSession(context.Background(), timerSession); err != nil {
+		if err = s.db.UpdateTimerSession(c.Request.Context(), timerSession); err != nil {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{})
 			return
 		}
@@ -62,7 +61,7 @@ func (s *Server) startTimerHandler(c *gin.Context) {
 
 	component := templates.TimerRunning(timerSession, timerSession.Duration)
 	c.Header("Content-Type", "text/html; charset=utf-8")
-	if err = component.Render(context.Background(), c.Writer); err != nil {
+	if err = component.Render(c.Request.Context(), c.Writer); err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{})
 		return
 	}
@@ -75,7 +74,7 @@ func (s *Server) stopTimerHandler(c *gin.Context) {
 		return
 	}
 
-	timerSession, err := s.db.FindTimerSession(context.Background(), gothUser.UserID, tag, models.StatusRunning)
+	timerSession, err := s.db.FindTimerSession(c.Request.Context(), gothUser.UserID, tag, models.StatusRunning)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{})
 		return
@@ -91,12 +90,12 @@ func (s *Server) stopTimerHandler(c *gin.Context) {
 	timerSession.Duration += elapsedTime
 	timerSession.Status = models.StatusStopped
 	timerSession.LastUpdated = currentTime
-	if err = s.db.UpdateTimerSession(context.Background(), timerSession); err != nil {
+	if err = s.db.UpdateTimerSession(c.Request.Context(), timerSession); err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{})
 		return
 	}
 
-	userTagStats, err := s.db.FindUserTagStats(context.Background(), gothUser.UserID, tag)
+	userTagStats, err := s.db.FindUserTagStats(c.Request.Context(), gothUser.UserID, tag)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{})
 		return
@@ -105,14 +104,14 @@ func (s *Server) stopTimerHandler(c *gin.Context) {
 	userTagStats.LastUpdated = currentTime
 	userTagStats.TotalDuration += elapsedTime
 
-	if err = s.db.UpdateUserTagStats(context.Background(), userTagStats); err != nil {
+	if err = s.db.UpdateUserTagStats(c.Request.Context(), userTagStats); err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{})
 		return
 	}
 
 	component := templates.TimerStopped(timerSession, timerSession.Duration)
 	c.Header("Content-Type", "text/html; charset=utf-8")
-	if err = component.Render(context.Background(), c.Writer); err != nil {
+	if err = component.Render(c.Request.Context(), c.Writer); err != nil {
 		return
 	}
 }
@@ -124,7 +123,7 @@ func (s *Server) resetTimerHandler(c *gin.Context) {
 		return
 	}
 
-	timerSession, err := s.db.FindTimerSession(context.Background(), gothUser.UserID, tag, models.StatusStopped)
+	timerSession, err := s.db.FindTimerSession(c.Request.Context(), gothUser.UserID, tag, models.StatusStopped)
 	if err != nil || timerSession == nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{})
 		return
@@ -134,14 +133,15 @@ func (s *Server) resetTimerHandler(c *gin.Context) {
 	timerSession.Status = models.StatusCompleted
 	timerSession.LastUpdated = currentTime
 	timerSession.EndTime = &currentTime
-	if err = s.db.UpdateTimerSession(context.Background(), timerSession); err != nil {
+	if err = s.db.UpdateTimerSession(c.Request.Context(), timerSession); err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{})
 		return
 	}
 
-	allUserTagStats, err := s.db.FindAllUserTagStats(context.Background(), gothUser.UserID)
+	allUserTagStats, err := s.db.FindAllUserTagStats(c.Request.Context(), gothUser.UserID)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{})
+		return
 	}
 	var tags []string
 	for _, tagStats := range allUserTagStats {
@@ -149,7 +149,8 @@ func (s *Server) resetTimerHandler(c *gin.Context) {
 	}
 
 	component := templates.TimerIdle(tags)
-	if err = component.Render(context.Background(), c.Writer); err != nil {
+	c.Header("Content-Type", "text/html; charset=utf-8")
+	if err = component.Render(c.Request.Context(), c.Writer); err != nil {
 		return
 	}
 }

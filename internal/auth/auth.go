@@ -65,14 +65,7 @@ func (s *service) StoreUserInSession(w http.ResponseWriter, r *http.Request, use
 	}
 
 	session.Values["user"] = string(userJSON)
-	err = session.Save(r, w)
-	if err != nil {
-		log.Printf("Error saving session: %v", err)
-		return err
-	}
-
-	log.Printf("User session saved for: %s", user.Email)
-	return nil
+	return session.Save(r, w)
 }
 
 func (s *service) ClearUserSession(w http.ResponseWriter, r *http.Request) error {
@@ -85,46 +78,31 @@ func (s *service) ClearUserSession(w http.ResponseWriter, r *http.Request) error
 	session.Options.MaxAge = -1
 	delete(session.Values, "user")
 
-	err = session.Save(r, w)
-	if err != nil {
-		log.Printf("Error clearing session: %v", err)
-		return err
-	}
-
-	log.Printf("User session cleared")
-	return nil
+	return session.Save(r, w)
 }
 
 func (s *service) GetUserFromSession(r *http.Request) (*goth.User, error) {
 	// Get the session
 	session, err := gothic.Store.Get(r, "user-session")
 	if err != nil {
-		log.Printf("Error getting session: %v", err)
 		return nil, err
 	}
 
-	// Check if the session has user data
 	userValue := session.Values["user"]
 	if userValue == nil {
-		log.Printf("No user data in session. Session values: %+v", session.Values)
 		return nil, fmt.Errorf("no user in session")
 	}
 
 	// Unmarshal the user data
 	userString, ok := userValue.(string)
 	if !ok {
-		log.Printf("Invalid session data type: %T", userValue)
 		return nil, fmt.Errorf("invalid session data")
 	}
 
-	// Parse the user from JSON
 	var user goth.User
-	err = json.Unmarshal([]byte(userString), &user)
-	if err != nil {
-		log.Printf("Error unmarshaling user: %v", err)
+	if err = json.Unmarshal([]byte(userString), &user); err != nil {
 		return nil, err
 	}
 
-	log.Printf("Successfully retrieved user from session: %s", user.Email)
 	return &user, nil
 }

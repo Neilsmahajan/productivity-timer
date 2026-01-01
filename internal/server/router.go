@@ -1,7 +1,6 @@
 package server
 
 import (
-	"context"
 	"log"
 	"net/http"
 
@@ -40,21 +39,22 @@ func (s *Server) RegisterRoutes() http.Handler {
 }
 
 func (s *Server) indexHandler(c *gin.Context) {
+	ctx := c.Request.Context()
+
 	// Try to get user from session
 	gothUser, err := s.auth.GetUserFromSession(c.Request)
 	if err != nil || gothUser == nil {
-		// No user logged in, show index page with login button
+		// No user logged in, show login page
 		component := templates.LoginPage()
-		if err = component.Render(context.Background(), c.Writer); err != nil {
-			log.Printf("Error rendering index page: %v", err)
+		if err = component.Render(ctx, c.Writer); err != nil {
+			log.Printf("Error rendering login page: %v", err)
 			c.String(http.StatusInternalServerError, "Error rendering page")
-			return
 		}
 		return
 	}
 
 	// User is logged in, get from database
-	user, err := s.db.GetUserByID(c.Request.Context(), gothUser.UserID)
+	user, err := s.db.GetUserByID(ctx, gothUser.UserID)
 	if err != nil {
 		log.Printf("Error getting user from database: %v", err)
 		c.String(http.StatusInternalServerError, "Error getting user")
@@ -64,25 +64,26 @@ func (s *Server) indexHandler(c *gin.Context) {
 	if user == nil {
 		// User not in database, show login page
 		component := templates.LoginPage()
-		if err = component.Render(context.Background(), c.Writer); err != nil {
-			log.Printf("Error rendering index page: %v", err)
+		if err = component.Render(ctx, c.Writer); err != nil {
+			log.Printf("Error rendering login page: %v", err)
 			c.String(http.StatusInternalServerError, "Error rendering page")
-			return
 		}
 		return
 	}
 
-	userTagStats, err := s.db.FindAllUserTagStats(c.Request.Context(), gothUser.UserID)
+	userTagStats, err := s.db.FindAllUserTagStats(ctx, gothUser.UserID)
+	if err != nil {
+		log.Printf("Error getting user tag stats: %v", err)
+	}
 	var tags []string
 	for _, tagStats := range userTagStats {
 		tags = append(tags, tagStats.Tag)
 	}
 
 	component := templates.IndexPage(gothUser, nil, tags)
-	if err = component.Render(context.Background(), c.Writer); err != nil {
-		log.Printf("Error rendering user page: %v", err)
+	if err = component.Render(ctx, c.Writer); err != nil {
+		log.Printf("Error rendering index page: %v", err)
 		c.String(http.StatusInternalServerError, "Error rendering page")
-		return
 	}
 }
 
