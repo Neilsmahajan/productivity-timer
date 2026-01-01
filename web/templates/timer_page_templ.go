@@ -43,7 +43,7 @@ func TimerIdle(tags []string) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div style=\"text-align: center; padding: 40px;\"><div style=\"font-size: 48px; font-weight: bold; margin-bottom: 20px;\">00:00:00</div><p style=\"color: #666; margin-bottom: 30px;\">No active timer</p><form hx-post=\"/timer/start\" hx-target=\"#timer-container\" hx-swap=\"innerHTML\" style=\"display: flex; gap: 10px; justify-content: center;\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div style=\"text-align: center; padding: 40px;\"><div style=\"font-size: 48px; font-weight: bold; margin-bottom: 20px;\">00:00:00</div><p style=\"color: #666; margin-bottom: 30px;\">No active timer</p><form hx-post=\"/timer/start\" hx-target=\"#timer-container\" hx-swap=\"innerHTML\" style=\"display: flex; gap: 10px; justify-content: center; align-items: flex-start;\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -51,7 +51,7 @@ func TimerIdle(tags []string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<button type=\"submit\" style=\"padding: 10px 20px; font-size: 16px; cursor: pointer;\">Start Timer</button></form></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<button type=\"submit\" style=\"padding: 8px 16px; font-size: 14px; cursor: pointer; background-color: #2563eb; color: white; border: none; border-radius: 4px;\">Start Timer</button></form></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
