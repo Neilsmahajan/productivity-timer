@@ -3,7 +3,6 @@ package auth
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 
@@ -16,7 +15,6 @@ import (
 
 const (
 	maxAge = 86400 * 30
-	isProd = false
 )
 
 type Service interface {
@@ -28,14 +26,16 @@ type Service interface {
 type service struct{}
 
 func NewAuth() Service {
-	if err := godotenv.Load(); err != nil {
-		log.Fatal("Error loading .env file")
-	}
+	// Load .env file if it exists (for local development)
+	// In production (Railway, etc.), env vars are set directly in the platform
+	_ = godotenv.Load()
 
 	googleClientId := os.Getenv("GOOGLE_KEY")
 	googleClientSecret := os.Getenv("GOOGLE_SECRET")
 	sessionSecret := os.Getenv("SESSION_SECRET")
-	port := os.Getenv("PORT")
+	baseURL := os.Getenv("BASE_URL") // e.g., "https://your-app.railway.app" or "http://localhost:8080"
+	appEnv := os.Getenv("APP_ENV")
+	isProd := appEnv == "production"
 
 	store := sessions.NewCookieStore([]byte(sessionSecret))
 	store.MaxAge(maxAge)
@@ -46,7 +46,7 @@ func NewAuth() Service {
 
 	gothic.Store = store
 
-	callbackURL := fmt.Sprintf("http://localhost:%s/auth/google/callback", port)
+	callbackURL := fmt.Sprintf("%s/auth/google/callback", baseURL)
 	goth.UseProviders(google.New(googleClientId, googleClientSecret, callbackURL))
 
 	return &service{}
