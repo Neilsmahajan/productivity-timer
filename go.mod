@@ -3,7 +3,7 @@ module github.com/neilsmahajan/productivity-timer
 go 1.25
 
 require (
-	github.com/a-h/templ v0.3.960
+	github.com/a-h/templ v0.3.977
 	github.com/gin-contrib/cors v1.7.6
 	github.com/gin-gonic/gin v1.11.0
 	github.com/gorilla/sessions v1.4.0

@@ -6,11 +6,11 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"github.com/neilsmahajan/productivity-timer/web/templates"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 
 	_ "github.com/neilsmahajan/productivity-timer/docs"
+	"github.com/neilsmahajan/productivity-timer/web/templates"
 )
 
 func (s *Server) RegisterRoutes() http.Handler {

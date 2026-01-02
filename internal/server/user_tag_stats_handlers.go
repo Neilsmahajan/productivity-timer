@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+
 	"github.com/neilsmahajan/productivity-timer/web/templates"
 )
 

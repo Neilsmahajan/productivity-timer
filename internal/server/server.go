@@ -8,6 +8,7 @@ import (
 	"time"
 
 	_ "github.com/joho/godotenv/autoload"
+
 	"github.com/neilsmahajan/productivity-timer/internal/auth"
 	"github.com/neilsmahajan/productivity-timer/internal/database"
 )

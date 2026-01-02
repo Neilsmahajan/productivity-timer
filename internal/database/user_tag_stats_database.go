@@ -5,9 +5,10 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/neilsmahajan/productivity-timer/internal/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+
+	"github.com/neilsmahajan/productivity-timer/internal/models"
 )
 
 func (s *service) getUserTagStatsCollection() *mongo.Collection {

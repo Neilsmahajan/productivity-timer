@@ -6,9 +6,10 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/mongo"
+
 	"github.com/neilsmahajan/productivity-timer/internal/models"
 	"github.com/neilsmahajan/productivity-timer/web/templates"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 // startTimerHandler godoc

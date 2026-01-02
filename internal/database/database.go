@@ -8,10 +8,10 @@ import (
 	"time"
 
 	_ "github.com/joho/godotenv/autoload"
-
-	"github.com/neilsmahajan/productivity-timer/internal/models"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+
+	"github.com/neilsmahajan/productivity-timer/internal/models"
 )
 
 type Service interface {

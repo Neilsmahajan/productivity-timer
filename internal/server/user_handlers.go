@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/markbates/goth/gothic"
+
 	"github.com/neilsmahajan/productivity-timer/internal/models"
 )
 
