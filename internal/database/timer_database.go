@@ -89,7 +89,11 @@ func (s *service) GetStatsSummary(ctx context.Context, userId string, startDate,
 	if err != nil {
 		return nil, err
 	}
-	defer cursor.Close(ctx)
+	defer func(cursor *mongo.Cursor, ctx context.Context) {
+		if err = cursor.Close(ctx); err != nil {
+			return
+		}
+	}(cursor, ctx)
 
 	var tagStatsList []models.TagStats
 	if err = cursor.All(ctx, &tagStatsList); err != nil {
@@ -148,7 +152,11 @@ func (s *service) GetTagSessions(ctx context.Context, userId, tag string, startD
 	if err != nil {
 		return nil, err
 	}
-	defer cursor.Close(ctx)
+	defer func(cursor *mongo.Cursor, ctx context.Context) {
+		if err = cursor.Close(ctx); err != nil {
+			return
+		}
+	}(cursor, ctx)
 
 	var sessions []*models.TimerSession
 	if err = cursor.All(ctx, &sessions); err != nil {
