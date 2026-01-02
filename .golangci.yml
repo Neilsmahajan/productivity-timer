@@ -8,7 +8,6 @@ linters:
   default: none
   enable:
     - errcheck
-    - gosimple
     - govet
     - ineffassign
     - staticcheck
@@ -42,7 +41,6 @@ linters:
       - path: docs/
         linters:
           - errcheck
-          - gosimple
           - govet
           - ineffassign
           - staticcheck
@@ -56,7 +54,6 @@ linters:
       - path: _templ\.go
         linters:
           - errcheck
-          - gosimple
           - govet
           - ineffassign
           - staticcheck
