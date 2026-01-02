@@ -89,7 +89,12 @@ func (s *Server) indexHandler(c *gin.Context) {
 	}
 
 	if user == nil {
-		// User not in database, show login page
+		// User in session but not in database (e.g., switched to new database)
+		// Clear the stale session and show login page
+		log.Printf("User in session but not in database, clearing stale session")
+		if clearErr := s.auth.ClearUserSession(c.Writer, c.Request); clearErr != nil {
+			log.Printf("Error clearing stale session: %v", clearErr)
+		}
 		component := templates.LoginPage()
 		if err = component.Render(ctx, c.Writer); err != nil {
 			log.Printf("Error rendering login page: %v", err)
