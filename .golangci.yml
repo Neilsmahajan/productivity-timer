@@ -1,10 +1,11 @@
-version: 2
+version: "2"
 
 run:
   timeout: 5m
   modules-download-mode: readonly
 
 linters:
+  default: none
   enable:
     - errcheck
     - gosimple
@@ -12,8 +13,6 @@ linters:
     - ineffassign
     - staticcheck
     - unused
-    - gofmt
-    - goimports
     - misspell
     - unconvert
     - bodyclose
@@ -21,30 +20,63 @@ linters:
     - gosec
     - prealloc
 
-linters-settings:
-  errcheck:
-    check-type-assertions: true
-  govet:
-    enable-all: true
-    disable:
-      - fieldalignment
-  gosec:
-    excludes:
-      - G104 # Audit errors not checked
-  goimports:
-    local-prefixes: github.com/neilsmahajan/productivity-timer
+  settings:
+    errcheck:
+      check-type-assertions: true
+    govet:
+      enable:
+        - nilness
+        - shadow
+    gosec:
+      excludes:
+        - G104 # Audit errors not checked
 
-issues:
-  exclude-rules:
-    # Exclude some linters from running on tests files
-    - path: _test\.go
-      linters:
-        - gosec
-        - noctx
-    # Exclude generated files
-    - path: docs/
-      linters:
-        - all
-    - path: _templ\.go
-      linters:
-        - all
+  exclusions:
+    rules:
+      # Exclude some linters from running on tests files
+      - path: _test\.go
+        linters:
+          - gosec
+          - noctx
+      # Exclude generated files
+      - path: docs/
+        linters:
+          - errcheck
+          - gosimple
+          - govet
+          - ineffassign
+          - staticcheck
+          - unused
+          - misspell
+          - unconvert
+          - bodyclose
+          - noctx
+          - gosec
+          - prealloc
+      - path: _templ\.go
+        linters:
+          - errcheck
+          - gosimple
+          - govet
+          - ineffassign
+          - staticcheck
+          - unused
+          - misspell
+          - unconvert
+          - bodyclose
+          - noctx
+          - gosec
+          - prealloc
+
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  settings:
+    goimports:
+      local-prefixes:
+        - github.com/neilsmahajan/productivity-timer
+  exclusions:
+    paths:
+      - docs/
+      - _templ\.go
