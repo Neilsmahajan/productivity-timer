@@ -23,7 +23,7 @@ RUN swag init -g cmd/api/main.go -o docs --parseDependency --parseInternal
 RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-w -s" -o productivity-timer ./cmd/api
 
 # Production stage
-FROM alpine:3.19
+FROM alpine:3.23
 
 # Install ca-certificates for HTTPS connections (needed for MongoDB Atlas)
 RUN apk --no-cache add ca-certificates tzdata
